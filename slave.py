@@ -38,7 +38,9 @@ while True:
         else:
             print("Send OK:", message_index)
             message_index += 1
+           
+        delay(1000);
     
 
-    delay(5000);
+    delay(1000);
     
