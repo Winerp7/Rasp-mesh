@@ -37,8 +37,9 @@ def main():
 
         else:
             print("Send OK:", message_index)
-            message_index += 1
-        
+
+
+        message_index += 1    
         delay(1000)
     
 
