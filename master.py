@@ -4,8 +4,6 @@ from RF24Mesh import *
 
 from struct import unpack
 
-
-
 radio = RF24(22,0) # GPIO22 for CE-pin and CE0 for CS-pin
 network = RF24Network(radio)
 mesh = RF24Mesh(radio, network)
