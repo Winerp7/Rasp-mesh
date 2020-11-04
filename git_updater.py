@@ -16,12 +16,14 @@ if __name__ == '__main__':
         # Delete the current directory
         try:
             shutil.rmtree(GIT_DIRECTORY)
+            print('Directory deleted')
         except:
             print('Failed to delete the directory')
 
         # Download the newest repository
         try:
             Repo.clone_from(GIT_URL, GIT_DIRECTORY)
+            print('Repository cloned')
         except:
             print('Failed to clone the repository')
 
@@ -29,5 +31,6 @@ if __name__ == '__main__':
         try:
             requirements_path = GIT_DIRECTORY + '/' + 'requirements.txt'
             subprocess.call(['pip3', 'install', '-r', requirements_path])
+            print('requirements installed')
         except:
             print('Failed to install pip requirements')
