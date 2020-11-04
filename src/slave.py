@@ -39,7 +39,7 @@ def main():
             print("Send OK:", message)
 
    
-        delay(1000)
+        delay(5000)
     
 
 if __name__ == '__main__':
