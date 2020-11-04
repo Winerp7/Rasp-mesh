@@ -12,7 +12,7 @@ def main():
     network = RF24Network(radio)
     mesh = RF24Mesh(radio, network)
     
-    mesh.setNodeID(10)
+    mesh.setNodeID(0)
     print("start nodeID", mesh.getNodeID())
     mesh.begin()
     radio.setPALevel(RF24_PA_MAX) # Power Amplifier
