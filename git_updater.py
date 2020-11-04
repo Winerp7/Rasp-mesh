@@ -1,4 +1,3 @@
-from git import Repo
 import subprocess
 import shutil
 
@@ -22,7 +21,7 @@ if __name__ == '__main__':
 
         # Download the newest repository
         try:
-            Repo.clone_from(GIT_URL, GIT_DIRECTORY)
+            subprocess.call(['git', 'clone', GIT_URL, GIT_DIRECTORY])
             print('Repository cloned')
         except:
             print('Failed to clone the repository')
