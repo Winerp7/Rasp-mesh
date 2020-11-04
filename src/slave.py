@@ -18,7 +18,7 @@ def main():
     radio.setPALevel(RF24_PA_MAX) # Power Amplifier
     radio.printDetails()
 
-    message = int(getserial()[:4], 16)
+    message = int(getserial(), 16)
 
     while True: 
 
@@ -36,7 +36,7 @@ def main():
                 print("Send fail, Test OK")
 
         else:
-            print("Send OK:", message_index)
+            print("Send OK:", message)
 
    
         delay(1000)
