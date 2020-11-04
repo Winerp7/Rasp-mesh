@@ -2,7 +2,7 @@ from RF24 import *
 from RF24Network import *
 from RF24Mesh import *
 
-from utils import delay
+from utils import delay, getserial
 
 from struct import pack
 
@@ -18,13 +18,13 @@ def main():
     radio.setPALevel(RF24_PA_MAX) # Power Amplifier
     radio.printDetails()
 
-    message_index = 0
+    message = int(getserial(), 16)
 
     while True: 
 
         mesh.update()
 
-        write_succesful = mesh.write(pack("L", message_index), ord('M'))
+        write_succesful = mesh.write(pack("L", message), ord('M'))
 
         if not write_succesful:
 
@@ -38,8 +38,7 @@ def main():
         else:
             print("Send OK:", message_index)
 
-
-        message_index += 1    
+   
         delay(1000)
     
 
