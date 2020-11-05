@@ -3,6 +3,7 @@ from RF24Network import *
 from RF24Mesh import *
 
 from struct import unpack
+import requests
 
 
 def main():
@@ -22,7 +23,10 @@ def main():
         while network.available():
             header, payload = network.read(10)
             if chr(header.type) == 'M':
-                print("Rcv {} from 0{:o}".format(unpack("L",payload)[0], header.from_node))
+                message = unpack("L",payload)[0]
+                from_node = header.from_node
+                r = requests.post('http://192.168.43.105:3000/api-test', data = {'id': message})
+                print(r.text)
             else:
                 print("Rcv bad type {} from 0{:o}".format(header.type,header.from_node))
 
