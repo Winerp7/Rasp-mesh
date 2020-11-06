@@ -17,9 +17,10 @@ def main():
     radio.printDetails()
 
     while True:
-        mesh.update()
-        mesh.DHCP()
-
+        mesh.update() # Keeps the mesh up and running and reconfigures it if need be
+        mesh.DHCP() # Handles address requests from the slaves
+        
+        # While there are message available
         while network.available():
             header, payload = network.read(10)
             if chr(header.type) == 'M':
