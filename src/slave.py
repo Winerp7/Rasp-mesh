@@ -4,7 +4,7 @@ from RF24Mesh import *
 
 from utils import delay, getserial
 
-from struct import pack
+from struct import *
 
 
 def main():
@@ -25,7 +25,7 @@ def main():
         mesh.update()
         message = b'Hello what are you doing right?'
         packed = pack(f'{len(message)}s', message)
-        write_succesful = mesh.write(octlit("00"), message, ord('M'), len(message))
+        write_succesful = mesh.write(packed, ord('M'))
 
         if not write_succesful:
 
