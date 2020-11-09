@@ -23,7 +23,7 @@ def main():
     while True: 
 
         mesh.update()
-        message = 'Hello what are you doing right?'
+        message = b'Hello what are you doing right?'
         packed = pack(f'{len(message)}s', message)
         write_succesful = mesh.write(message, ord('M'))
 
