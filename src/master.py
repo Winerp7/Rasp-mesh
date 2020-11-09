@@ -24,7 +24,7 @@ def main():
         while network.available():
             header, payload = network.read(10)
             if chr(header.type) == 'M':
-                message = unpack("L",payload)[0]
+                message = payload.decode('utf-8')
                 from_node = header.from_node
                 r = requests.post('http://192.168.43.105:3000/api-test', data = {'id': message})
                 print(r.text)
