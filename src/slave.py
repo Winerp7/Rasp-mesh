@@ -21,8 +21,8 @@ def main():
     message = int(getserial(), 16)
 
     while True: 
-
         mesh.update()
+        
         message = b'Hello what are you doing right?'
         write_succesful = mesh.write(message, ord('M'))
 
