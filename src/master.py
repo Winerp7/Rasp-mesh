@@ -22,7 +22,7 @@ def main():
         
         # While there are message available
         while network.available():
-            header, payload = network.read(10)
+            header, payload = network.read(144)
             if chr(header.type) == 'M':
                 message = payload.decode('utf-8')
                 print(message)
