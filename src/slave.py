@@ -24,7 +24,7 @@ def main():
 
         mesh.update()
 
-        write_succesful = mesh.write(b'Hello World!', ord('M'))
+        write_succesful = mesh.write(b'Hello what are you doing right?', ord('M'))
 
         if not write_succesful:
 
