@@ -23,7 +23,7 @@ def main():
     while True: 
 
         mesh.update()
-        message = b'Hello what are you doing right?'
+        message = str.encode('Hello what are you doing right?')
         write_succesful = mesh.write(0, message, ord('M'), len(message))
 
         if not write_succesful:
