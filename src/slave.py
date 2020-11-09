@@ -24,8 +24,7 @@ def main():
 
         mesh.update()
         message = b'Hello what are you doing right?'
-        packed = pack(f'{len(message)}s', message)
-        write_succesful = mesh.write(packed, ord('M'))
+        write_succesful = mesh.write(message, ord('M'))
 
         if not write_succesful:
 
