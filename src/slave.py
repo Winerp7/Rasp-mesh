@@ -23,8 +23,8 @@ def main():
     while True: 
 
         mesh.update()
-
-        write_succesful = mesh.write(b'Hello what are you doing right?', ord('M'))
+        message = b'Hello what are you doing right?'
+        write_succesful = mesh.write(0, message, ord('M'), len(message))
 
         if not write_succesful:
 
