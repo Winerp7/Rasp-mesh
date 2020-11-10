@@ -44,8 +44,8 @@ class MeshNet:
                 
                 return radio, network, mesh
 
-            except:
-                print('INIT FAILED', flush=True)
+            except Exception as e:
+                print('INIT FAILED', e, flush=True)
                 if i < MAX_INIT_TRIES - 1:
                     print('RETRYING', flush=True)
 
