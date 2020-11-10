@@ -5,13 +5,13 @@ import requests
 
 
 def main():
-    mesh = MeshNet(master=False)
+    mesh = MeshNet(master=True)
 
     while True:
         mesh.update() # Keeps the mesh up and running and reconfigures it if need be
         mesh.DHCP() # Handles address requests from the slaves
         
-        for from_node, messages in mesh.read():
+        for from_node, message in mesh.read():
             print(message, flush=True)
             r = requests.post('http://192.168.43.105:3000/api-test', data = {'id': message})
             print(r.text, flush=True)

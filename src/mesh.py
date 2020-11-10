@@ -19,7 +19,7 @@ class MeshNet:
     RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX = range(4) # 0, 1, 2, 3
     MASTER_NODE_ID = 0
 
-    def __init__(self, master=False, data_rate=MeshNet.RF24_1MBPS, power_level=MeshNet.RF24_PA_MAX):
+    def __init__(self, master=False, data_rate=RF24_1MBPS, power_level=RF24_PA_MAX):
         self.data_rate = data_rate
         self.power_level = power_level
         self.is_master = master
@@ -54,7 +54,7 @@ class MeshNet:
 
     def send(self, message):
         assert isinstance(message, str) # Make sure the message is a string
-        message = message.encode()
+        message = str.encode(message)
 
         write_successful = self.mesh.write(message, ord('M'))
         if not write_successful:
