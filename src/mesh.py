@@ -5,7 +5,7 @@ from RF24Mesh import *
 from collections import deque
 from utils import force_reboot
 
-
+MASTER_NODE_ID = 0
 MAX_INIT_TRIES = 10
 MAX_PAYLOAD_SIZE = 144
 MESH_DEFAULT_CHANNEL = 97
@@ -17,7 +17,6 @@ CS_PIN = 0
 class MeshNet:
     RF24_1MBPS, RF24_2MBPS, RF24_250KBPS = range(3) # 0, 1, 2
     RF24_PA_MIN, RF24_PA_LOW, RF24_PA_HIGH, RF24_PA_MAX = range(4) # 0, 1, 2, 3
-    MASTER_NODE_ID = 0
 
     def __init__(self, master=False, data_rate=RF24_1MBPS, power_level=RF24_PA_MAX):
         self.data_rate = data_rate

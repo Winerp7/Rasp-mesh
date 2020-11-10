@@ -9,7 +9,6 @@ def main():
 
     while True:
         mesh.update() # Keeps the mesh up and running and reconfigures it if need be
-        mesh.DHCP() # Handles address requests from the slaves
         
         for from_node, message in mesh.read():
             print(message, flush=True)
