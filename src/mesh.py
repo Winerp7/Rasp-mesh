@@ -40,7 +40,7 @@ class MeshNet:
                 if self.is_master:
                     mesh.setNodeID(MASTER_NODE_ID)
 
-                mesh.begin(MESH_DEFAULT_CHANNEL, self.data_rate, MESH_RENEWAL_TIMEOUT)
+                mesh.begin()
                 
                 return radio, network, mesh
 
