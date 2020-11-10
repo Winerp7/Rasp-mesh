@@ -42,7 +42,7 @@ class MeshNet:
 
                 mesh.begin()
                 
-                return radio,'' network, mesh
+                return radio, network, mesh
 
             except Exception as e:
                 print('INIT FAILED', e, flush=True)
