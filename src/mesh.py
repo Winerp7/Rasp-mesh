@@ -50,7 +50,8 @@ class MeshNet:
                 if i < MAX_INIT_TRIES - 1:
                     print('RETRYING', flush=True)
 
-        force_reboot()
+        print('REBOOTING', flush=True)
+        #force_reboot()
 
     def send(self, message):
         assert isinstance(message, str) # Make sure the message is a string
