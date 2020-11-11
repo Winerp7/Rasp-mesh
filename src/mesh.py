@@ -26,7 +26,11 @@ class MeshNet:
         self.power_level = power_level
         self.is_master = master
 
-        self._force_init()
+        self.radio = RF24(CE_PIN, CS_PIN) # GPIO22 for CE-pin and CE0 for CS-pin
+        self.network = RF24Network(self.radio)
+        self.mesh = RF24Mesh(self.radio, self.network)
+        self.mesh.setNodeID(MASTER_NODE_ID if self.is_master else 4)
+        self.mesh.begin()
 
         self.radio.setPALevel(self.power_level)
         self.radio.printDetails()
@@ -78,21 +82,6 @@ class MeshNet:
             self.write_buffer.pop()
         else:
             self._renewAddress()
-
-    def _force_init(self):
-        
-        self.radio = RF24(CE_PIN, CS_PIN) # GPIO22 for CE-pin and CE0 for CS-pin
-        self.network = RF24Network(self.radio)
-        self.mesh = RF24Mesh(self.radio, self.network)
-
-        #if self.is_master:
-        self.mesh.setNodeID(MASTER_NODE_ID if self.is_master else 4)
-        
-        self.mesh.begin()
-
-
-        print('REBOOTING', flush=True)
-        #force_reboot()
 
     def _renewAddress(self):
         if not self.mesh.checkConnection():
