@@ -75,7 +75,7 @@ class MeshNet:
         
         write_successful = self.mesh.write(message, ord('M'))
         if write_successful: # If it sends the message we delete it from the buffer
-            self.write_buffer.pop(0)
+            self.write_buffer.pop()
         else:
             self._renewAddress()
 
