@@ -5,7 +5,7 @@ from struct import *
 
 class SlaveNode:
     def __init__(self):
-        self.meshnet = MeshNet(master=False)
+        self.mesh = MeshNet(master=False)
         self.confirmed = False
 
     def init_node(self):
@@ -23,10 +23,10 @@ class SlaveNode:
         message = 'Hello'
         
         while True: 
-            self.meshnet.update()
+            self.mesh.update()
 
             if timer.time_passed() >= 1000:
-                self.meshnet.send_message(message)
+                self.mesh.send_message(message)
                 timer.reset()
 
 
