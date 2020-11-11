@@ -80,11 +80,11 @@ class MeshNet:
             self._renewAddress()
 
     def _force_init(self):
-
+        
         try:
             self.radio = RF24(CE_PIN, CS_PIN) # GPIO22 for CE-pin and CE0 for CS-pin
-            self.network = RF24Network(radio)
-            self.mesh = RF24Mesh(radio, network)
+            self.network = RF24Network(self.radio)
+            self.mesh = RF24Mesh(self.radio, self.network)
 
             #if self.is_master:
             self.mesh.setNodeID(MASTER_NODE_ID if self.is_master else 4)
@@ -93,8 +93,6 @@ class MeshNet:
 
         except Exception as e:
             print('INIT FAILED', e, flush=True)
-            if i < MAX_INIT_TRIES - 1:
-                print('RETRYING', flush=True)
 
 
         print('REBOOTING', flush=True)
