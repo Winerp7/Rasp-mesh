@@ -91,7 +91,7 @@ class MeshNet:
                 if self.is_master:
                     mesh.setNodeID(MASTER_NODE_ID)
 
-                mesh.begin(MESH_DEFAULT_CHANNEL)
+                mesh.begin()
                 
                 return radio, network, mesh
 
