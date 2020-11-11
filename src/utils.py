@@ -21,3 +21,17 @@ def getserial():
 
 def force_reboot():
 	subprocess.call(['sudo', 'reboot'])
+
+
+class Timer:
+	def __init__(self):
+		self.start = time()
+
+	def time_passed(self):
+		return int((time()-self.start)*1000) % (2 ** 32)
+
+	def reset(self):
+		self.start = time()
+
+
+	
