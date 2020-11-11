@@ -106,31 +106,3 @@ class MeshNet:
     def _renewAddress(self):
         if not self.mesh.checkConnection():
             self.mesh.renewAddress()
-            
-    def send(self, message):
-        assert isinstance(message, str) # Make sure the message is a string
-        message = str.encode(message)
-
-        write_successful = self.mesh.write(message, ord('M'))
-        if not write_successful:
-            self.renewAddress()
-        
-        return write_successful
-
-    # TODO: make on_message method
-    def read(self):
-        messages = []
-
-        while self.network.available():
-            header, payload = self.network.read(MAX_PAYLOAD_SIZE)
-            if chr(header.type) == 'M':
-                message = payload.decode('utf-8')
-                from_node = header.from_node
-                messages.append((from_node, message))
-        
-        return messages
-
-    def update(self):
-        self.mesh.update()
-        if self.is_master:
-            self.mesh.DHCP()
