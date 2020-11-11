@@ -1,32 +1,35 @@
 from mesh import MeshNet
-from utils import delay
+from utils import delay, Timer
 from struct import *
-from time import time
-
-start = time()
-
-def millis():
-    return int((time()-start)*1000) % (2 ** 32)
 
 
-def main():
-    mesh = MeshNet(master=False)
+class SlaveNode:
+    def __init__(self):
+        self.mesh = MeshNet(master=False)
+        self.confirmed = False
 
-    message = 'Hello this string is not too big'
-    displayTimer = millis()
-    
-    while True: 
-        mesh.update()
+    def init_node(self):
+        init_message = 'init'
+        self.mesh.send_message(message)
 
-        if (millis() - displayTimer) >= 1000:
-            displayTimer = millis()
-
-            write_successful = mesh.send(message)
-            if write_successful:
-                print(f'Sent: {message}', flush=True)
-
-        delay(1)
+    def message_handler(from_node, message):
+        print(message)
         
+    def run(self):
+        self.mesh.on_messsage(self.message_handler)
+        
+        timer = Timer()
+
+        message = 'Hello this string is not too big'
+        
+        while True: 
+            mesh.update()
+
+            if timer.time_passed() >= 1000:
+                mesh.send_message(message)
+
+
 
 if __name__ == '__main__':
-    main()
+    slave = SlaveNode()
+    slave.run()
