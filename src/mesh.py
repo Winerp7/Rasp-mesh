@@ -27,6 +27,7 @@ class MeshNet:
 
         self.radio.setPALevel(self.power_level)
         self.radio.printDetails()
+        # add a write buffer that and send messages in update
 
     def force_init(self):
         done = False
@@ -62,7 +63,7 @@ class MeshNet:
         
         return write_successful
 
-
+    # TODO: make on_message method
     def read(self):
         messages = []
 
