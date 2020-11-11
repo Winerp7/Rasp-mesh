@@ -26,7 +26,7 @@ class MeshNet:
         self.power_level = power_level
         self.is_master = master
 
-        self.radio, self.network, self.mesh = self._force_init()
+        self._force_init()
 
         self.radio.setPALevel(self.power_level)
         self.radio.printDetails()
