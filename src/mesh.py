@@ -8,7 +8,7 @@ from utils import force_reboot, delay, Timer
 
 MASTER_NODE_ID = 0
 MAX_INIT_TRIES = 10
-MAX_PAYLOAD_SIZE = 144
+MAX_PAYLOAD_SIZE = 10
 MESH_DEFAULT_CHANNEL = 97
 MESH_RENEWAL_TIMEOUT = 7500
 CE_PIN = 22
@@ -49,20 +49,20 @@ class MeshNet:
         if self.is_master:
             self.mesh.DHCP()
 
-        self._read()
-
-        if self.timer.time_passed() > WRITE_INTERVAL:
-            self._write()
-            self.timer.reset()
+        if self.is_master:
+            self._read()
+        else:
+            if self.timer.time_passed() > WRITE_INTERVAL:
+                self._write()
+                self.timer.reset()
 
     def _read(self):
-        messages = []
-
         while self.network.available():
             header, payload = self.network.read(MAX_PAYLOAD_SIZE)
             if chr(header.type) == 'M':
-                message = payload.decode('utf-8')
+                message = payload.decode()
                 from_node = header.from_node
+                print(message)
                 
                 if self.message_callback is not None:
                     self.message_callback(from_node, message)
@@ -91,7 +91,7 @@ class MeshNet:
                 if self.is_master:
                     mesh.setNodeID(MASTER_NODE_ID)
 
-                mesh.begin()
+                mesh.begin(MESH_DEFAULT_CHANNEL)
                 
                 return radio, network, mesh
 

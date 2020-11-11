@@ -9,7 +9,6 @@ class MasterNode:
 
     def message_handler(from_node, message):
         print(message, flush=True)
-        '''
         try:
             r = requests.post('http://192.168.43.105:3000/api-test', data = {'id': message})
             print(r.status_code, flush=True)
@@ -17,7 +16,6 @@ class MasterNode:
                 print(r.text, flush=True)
         except:
             print('Failed to contact server')
-        '''
 
     def run(self):
         self.mesh.on_messsage(self.message_handler)
