@@ -12,7 +12,7 @@ class SlaveNode:
         init_message = 'init'
         self.mesh.send_message(message)
 
-    def message_handler(from_node, message):
+    def message_handler(self, from_node, message):
         print(message)
         
     def run(self):
@@ -34,7 +34,7 @@ class MasterNode:
     def __init__(self):
         self.mesh = MeshNet(master=True)
 
-    def message_handler(from_node, message):
+    def message_handler(self, from_node, message):
         print(message, flush=True)
         try:
             r = requests.post('http://192.168.43.105:3000/api-test', data = {'id': message})
