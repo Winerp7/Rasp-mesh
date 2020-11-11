@@ -26,20 +26,25 @@ class MeshNet:
         self.power_level = power_level
         self.is_master = master
 
-        self.radio = RF24(CE_PIN, CS_PIN) # GPIO22 for CE-pin and CE0 for CS-pin
-        self.network = RF24Network(self.radio)
-        self.mesh = RF24Mesh(self.radio, self.network)
-        self.mesh.setNodeID(MASTER_NODE_ID if self.is_master else 4)
-        self.mesh.begin()
-
-        self.radio.setPALevel(self.power_level)
-        self.radio.printDetails()
+        self.radio, self.network, self.mesh = self._create_mesh()
         # add a write buffer that and send messages in update
 
         self.write_buffer = deque(maxlen=BUFFER_LENGTH)
         self.message_callback = None
         self.timer = Timer()
 
+
+    def _create_mesh(self):
+        radio = RF24(CE_PIN, CS_PIN) # GPIO22 for CE-pin and CE0 for CS-pin
+        network = RF24Network(radio)
+        mesh = RF24Mesh(radio, network)
+
+        mesh.setNodeID(0)
+        mesh.begin()
+        radio.setPALevel(RF24_PA_MAX) # Power Amplifier
+        radio.printDetails()
+
+        return radio, network, mesh
 
     def send_message(self, message):
         encoded = str.encode(message)
