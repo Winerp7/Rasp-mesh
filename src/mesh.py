@@ -49,7 +49,7 @@ class MeshNet:
             self.mesh.DHCP()
 
         self._read()
-        
+
         if self.timer.time_passed() > WRITE_INTERVAL:
             self._write()
             self.timer.reset()
@@ -67,9 +67,12 @@ class MeshNet:
                     self.message_callback(from_node, message)
 
     def _write(self):
+        if len(self.write_buffer) == 0:
+            return
+
         message = self.write_buffer[0]
         
-        write_successful = mesh.write(message, ord('M')):
+        write_successful = self.mesh.write(message, ord('M'))
         if write_successful: # If it sends the message we delete it from the buffer
             self.write_buffer.pop(0)
         else:

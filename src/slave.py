@@ -17,16 +17,17 @@ class SlaveNode:
         
     def run(self):
         self.mesh.on_messsage(self.message_handler)
-        
+
         timer = Timer()
 
         message = 'Hello this string is not too big'
         
         while True: 
-            mesh.update()
+            self.mesh.update()
 
             if timer.time_passed() >= 1000:
-                mesh.send_message(message)
+                self.mesh.send_message(message)
+                timer.reset()
 
 
 
