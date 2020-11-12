@@ -50,7 +50,9 @@ class MasterNode:
         self.mesh.send_message(init_message)
 
     def message_handler(self, from_node, message):
-        
+        print(message, flush=True)
+        message_dict = json_string_to_dict(message)
+
         if message_dict['type'] == 'init':
             self.init_response()
             new_node = message_dict['id']
@@ -60,7 +62,6 @@ class MasterNode:
             pass
             
         self.mesh.send_message(message)
-        print(message, flush=True)
         '''
         try:
             r = requests.post('http://192.168.43.105:3000/api-test', data = {'id': message})
