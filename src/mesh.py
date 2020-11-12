@@ -39,9 +39,8 @@ class MeshNet:
         network = RF24Network(radio)
         mesh = RF24Mesh(radio, network)
 
-        if self.is_master:
-            mesh.setNodeID(0)
-            
+        mesh.setNodeID(0)
+
         mesh.begin()
         radio.setPALevel(RF24_PA_MAX) # Power Amplifier
         radio.printDetails()
