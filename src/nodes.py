@@ -22,7 +22,12 @@ class SlaveNode:
 
         elif message_dict['type'] == 'update':
             pass
-        
+    
+    def create_data_message(self):
+        message_dict = {'type': 'data', 'values': ['what', 'the', 'fuck']}
+        message = dict_to_json_string(message_dict)
+        return message
+
     def run(self):
         self.mesh.on_messsage(self.message_handler)
         self.init_node()
@@ -33,8 +38,8 @@ class SlaveNode:
             self.mesh.update()
 
             if self.confirmed:
-                message_dict = {'type': 'data', 'values': ['what', 'the', 'fuck']}
                 if timer.time_passed() >= 1000:
+                    message = self.create_data_message()
                     self.mesh.send_message(message)
                     timer.reset()
 
@@ -47,7 +52,7 @@ class MasterNode:
         self.new_nodes = []
 
     def init_node(self):
-        # init node on server
+        # TODO: init node on server
         message_dict = {'type': 'init', 'confirmed': True}
         init_message = dict_to_json_string(message_dict)
         self.mesh.send_message(init_message)
@@ -58,12 +63,11 @@ class MasterNode:
 
         if message_dict['type'] == 'init':
             self.init_node()
-            new_node = message_dict['id']
 
-        if message_dict['type'] == 'data': # TODO
+        if message_dict['type'] == 'data': # TODO: send data to server
             pass
         
-        if message_dict['type'] == 'update-confirm':
+        if message_dict['type'] == 'update-confirm': # TODO: change update state of the node
             pass
         
     
