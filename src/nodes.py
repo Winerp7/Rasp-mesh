@@ -28,24 +28,27 @@ class SlaveNode:
         self.init_node()
 
         timer = Timer()
-
-        message = 'I am confirmed' if self.confirmed else 'i am not confirmed'
         
         while True: 
             self.mesh.update()
 
-            if timer.time_passed() >= 1000:
-                #self.mesh.send_message(message)
-                timer.reset()
+            if self.confirmed:
+                message_dict = {'type': 'data', 'values': ['what', 'the', 'fuck']}
+                if timer.time_passed() >= 1000:
+                    self.mesh.send_message(message)
+                    timer.reset()
 
 
 class MasterNode:
+    UPDATE_INTERVAL = 1000
+
     def __init__(self):
         self.mesh = MeshNet(master=True)
         self.new_nodes = []
 
-    def init_response(self):
-        message_dict = {'type': 'init', 'confirmed': False}
+    def init_node(self):
+        # init node on server
+        message_dict = {'type': 'init', 'confirmed': True}
         init_message = dict_to_json_string(message_dict)
         self.mesh.send_message(init_message)
 
@@ -54,25 +57,28 @@ class MasterNode:
         message_dict = json_string_to_dict(message)
 
         if message_dict['type'] == 'init':
-            self.init_response()
+            self.init_node()
             new_node = message_dict['id']
-            self.new_nodes.append(new_node)
 
         if message_dict['type'] == 'data': # TODO
             pass
-            
-        '''
-        try:
-            r = requests.post('http://192.168.43.105:3000/api-test', data = {'id': message})
-            print(r.status_code, flush=True)
-            if r.status_code == 200:
-                print(r.text, flush=True)
-        except:
-            print('Failed to contact server')
-        '''
+        
+        if message_dict['type'] == 'update-confirm':
+            pass
+        
+    
+    def fetch_updates(self): # TODO, get /update from server
+        pass
 
     def run(self):
         self.mesh.on_messsage(self.message_handler)
 
+        timer = Timer()
+
         while True:
             self.mesh.update()
+
+            if timer.time_passed() > MasterNode.UPDATE_INTERVAL:
+                self.fetch_updates()
+                timer.reset()
+
