@@ -45,7 +45,7 @@ class MasterNode:
         self.new_nodes = []
 
     def init_response(self):
-        message_dict = {'type': 'init', 'confirmed': self.id}
+        message_dict = {'type': 'init', 'confirmed': False}
         init_message = dict_to_json_string(message_dict)
         self.mesh.send_message(init_message)
 

@@ -8,7 +8,7 @@ from utils import force_reboot, delay, Timer
 
 MASTER_NODE_ID = 0
 MAX_INIT_TRIES = 10
-MAX_PAYLOAD_SIZE = 10
+MAX_PAYLOAD_SIZE = 144
 MESH_DEFAULT_CHANNEL = 98
 MESH_RENEWAL_TIMEOUT = 7500
 CE_PIN = 22
@@ -39,8 +39,7 @@ class MeshNet:
         network = RF24Network(radio)
         mesh = RF24Mesh(radio, network)
 
-        if self.is_master:
-            mesh.setNodeID(0)
+        mesh.setNodeID(0 if self.is_master else 4)
 
         mesh.begin(MESH_DEFAULT_CHANNEL)
         radio.setPALevel(RF24_PA_MAX) # Power Amplifier
@@ -85,7 +84,7 @@ class MeshNet:
         write_successful = self.mesh.write(message, ord('M'))
         if write_successful: # If it sends the message we delete it from the buffer
             self.write_buffer.pop()
-        else:
+        elif not self.is_master:
             self._renewAddress()
 
     def _renewAddress(self):
