@@ -9,7 +9,7 @@ from utils import force_reboot, delay, Timer
 MASTER_NODE_ID = 0
 MAX_INIT_TRIES = 10
 MAX_PAYLOAD_SIZE = 144
-MESH_DEFAULT_CHANNEL = 98
+MESH_DEFAULT_CHANNEL = 90
 MESH_RENEWAL_TIMEOUT = 7500
 CE_PIN = 22
 CS_PIN = 0
@@ -41,7 +41,7 @@ class MeshNet:
 
         mesh.setNodeID(0 if self.is_master else 4)
 
-        mesh.begin(MESH_DEFAULT_CHANNEL)
+        mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_250KBPS, MESH_RENEWAL_TIMEOUT)
         radio.setPALevel(RF24_PA_MAX) # Power Amplifier
         radio.printDetails()
 
