@@ -35,6 +35,7 @@ class MasterNode:
         self.mesh = MeshNet(master=True)
 
     def message_handler(self, from_node, message):
+        self.mesh.send_message(message)
         print(message, flush=True)
         try:
             r = requests.post('http://192.168.43.105:3000/api-test', data = {'id': message})
