@@ -24,11 +24,11 @@ def force_reboot():
 	subprocess.call(['sudo', 'reboot'])
 
 
-def dict_to_json_string(dictionary):
-	json_object = json.dumps(dictionary)
+def to_json(py_object):
+	json_object = json.dumps(py_object)
 	return str(json_object)
 
-def json_string_to_dict(json_string):
+def from_json(json_string):
 	return json.loads(json_string)
 
 

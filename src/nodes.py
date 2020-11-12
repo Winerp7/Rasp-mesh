@@ -1,5 +1,5 @@
 from mesh import MeshNet
-from utils import get_serial, delay, Timer, json_string_to_dict, dict_to_json_string
+from utils import get_serial, delay, Timer, from_json, to_json
 import requests
 
 class SlaveNode:
@@ -10,12 +10,12 @@ class SlaveNode:
 
     def init_node(self):
         message_dict = {'type': 'init', 'id': self.id}
-        init_message = dict_to_json_string(message_dict)
+        init_message = to_json(message_dict)
         self.mesh.send_message(init_message)
 
     def message_handler(self, from_node, message):
         print(message, flush=True)
-        message_dict = json_string_to_dict(message)
+        message_dict = from_json(message)
 
         if message_dict['type'] == 'init':
             self.confirmed = message_dict['confirmed']
@@ -25,7 +25,7 @@ class SlaveNode:
     
     def create_data_message(self):
         message_dict = {'type': 'data', 'values': ['what', 'the', 'fuck']}
-        message = dict_to_json_string(message_dict)
+        message = to_json(message_dict)
         return message
 
     def run(self):
@@ -54,12 +54,12 @@ class MasterNode:
     def init_node(self):
         # TODO: init node on server
         message_dict = {'type': 'init', 'confirmed': True}
-        init_message = dict_to_json_string(message_dict)
+        init_message = to_json(message_dict)
         self.mesh.send_message(init_message)
 
     def message_handler(self, from_node, message):
         print(message, flush=True)
-        message_dict = json_string_to_dict(message)
+        message_dict = from_json(message)
 
         if message_dict['type'] == 'init':
             self.init_node()
