@@ -61,7 +61,6 @@ class MasterNode:
         if message_dict['type'] == 'data': # TODO
             pass
             
-        self.mesh.send_message(message)
         '''
         try:
             r = requests.post('http://192.168.43.105:3000/api-test', data = {'id': message})

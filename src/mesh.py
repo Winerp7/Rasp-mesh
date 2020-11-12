@@ -70,8 +70,7 @@ class MeshNet:
             if chr(header.type) == 'M':
                 message = payload.decode()
                 from_node = header.from_node
-                print(message)
-                
+
                 if self.message_callback is not None:
                     self.message_callback(from_node, message)
 
@@ -81,7 +80,13 @@ class MeshNet:
 
         message = self.write_buffer[-1]
         
-        write_successful = self.mesh.write(message, ord('M'))
+
+        # TODO Change
+        if self.is_master:
+            write_successful = self.mesh.write(message, ord('M'), 4)
+        else:
+            write_successful = self.mesh.write(message, ord('M'))
+
         if write_successful: # If it sends the message we delete it from the buffer
             self.write_buffer.pop()
         elif not self.is_master:
