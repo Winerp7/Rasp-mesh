@@ -39,7 +39,9 @@ class MeshNet:
         network = RF24Network(radio)
         mesh = RF24Mesh(radio, network)
 
-        mesh.setNodeID(0)
+        if self.is_master:
+            mesh.setNodeID(0)
+            
         mesh.begin()
         radio.setPALevel(RF24_PA_MAX) # Power Amplifier
         radio.printDetails()
@@ -58,12 +60,10 @@ class MeshNet:
         if self.is_master:
             self.mesh.DHCP()
 
-        if self.is_master:
-            self._read()
-        else:
-            if self.timer.time_passed() > WRITE_INTERVAL:
-                self._write()
-                self.timer.reset()
+        self._read()
+        if self.timer.time_passed() > WRITE_INTERVAL:
+            self._write()
+            self.timer.reset()
 
     def _read(self):
         while self.network.available():
