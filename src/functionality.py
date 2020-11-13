@@ -1,5 +1,5 @@
 import threading
-from utils import delay, get_serial
+from utils import delay, get_serial, to_json
 
 class Functionality(threading.Thread):
     def __init__(self, setup, loop, mesh):
@@ -22,7 +22,8 @@ class Functionality(threading.Thread):
                 'time': '2131322132', # TODO MATTI CHANGE THIS TO OTHER FORMAT
                 'id': get_serial()
                 }
-            pass
+            data_message = to_json(message_dict)
+            self.mesh.send_message(data_message)
 
         wait = lambda millis: delay(millis)
         

@@ -37,7 +37,6 @@ class SlaveNode:
             self.mesh.send_message(confirm_message)
                 
     def try_update(self, message_dict):
-        # TODO: figure out whether this should be saved in a file
 
         if message_dict['reboot']:
             force_reboot()
