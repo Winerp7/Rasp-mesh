@@ -6,7 +6,6 @@ import requests
 class SlaveNode:
     def __init__(self):
         self.mesh = MeshNet(master=False)
-        self.confirmed = False
         self.id = get_serial()
         self.functionality = None
 
@@ -24,12 +23,6 @@ class SlaveNode:
         while True: 
             self.mesh.update()
 
-            if self.confirmed:
-                if timer.time_passed() >= 1000:
-                    message = self.create_data_message()
-                    self.mesh.send_message(message)
-                    timer.reset()
-
     def message_handler(self, from_node, message):
         print(message, flush=True)
         message_dict = from_json(message)
@@ -42,10 +35,8 @@ class SlaveNode:
             message_dict = {'type': 'update-confirm', 'success': has_succeeded}
             confirm_message = to_json(message_dict)
             self.mesh.send_message(confirm_message)
-            
-            
+                
     def try_update(self, message_dict):
-        setup, loop = message_dict['setup'], message_dict['loop']
         # TODO: figure out whether this should be saved in a file
 
         if message_dict['reboot']:
@@ -54,6 +45,10 @@ class SlaveNode:
         if self.functionality is not None:
             self.functionality.stop()
         
+        if message_dict['sleep']:
+            return True
+    
+        setup, loop = message_dict['setup'], message_dict['loop']
         func_is_working = Functionality.test_functionality(setup, loop)
         
         if func_is_working:
@@ -74,7 +69,14 @@ class MasterNode:
     def __init__(self):
         self.mesh = MeshNet(master=True)
         self.id = get_serial()
-        self.new_nodes = []
+        self.nodes = {'00000000e86aa86c': 
+            {
+                'setup': ''
+                'loop': ''
+                'restart': False
+                'sleep': False
+            }
+        }  # TODO: dont hard code
 
     def init_master(self):
         pass # TODO: init master on server
@@ -101,7 +103,11 @@ class MasterNode:
         message_dict = from_json(message)
 
         if message_dict['type'] == 'init':
-            self.new_node()
+            _id = message_dict['id']
+            if _id in self.nodes:
+                self.send_update(_id)
+            else:
+                self.new_node(message_dict['id'])
 
         if message_dict['type'] == 'data': # TODO: send data to server
             pass
@@ -110,9 +116,15 @@ class MasterNode:
             update_succeeded = message_dict['success']
             # send back to server
 
-    def new_node(self):
+    def new_node(self, _id):
         # TODO: init node on server
-        message_dict = {'type': 'init', 'confirmed': True}
-        init_message = to_json(message_dict)
-        self.mesh.send_message(init_message)
+        # Add to some list of nodes
+
+    def send_update(self, _id):
+        status = self.nodes[_id]
+        message_dict = {'type': 'update', **status}
+        update_message = to_json(message_dict)
+        self.mesh.send_message(update_message)
+
+
     
