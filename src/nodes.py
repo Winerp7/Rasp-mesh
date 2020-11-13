@@ -31,9 +31,9 @@ class SlaveNode:
             self.confirmed = message_dict['confirmed']
 
         elif message_dict['type'] == 'update':
-            has_succeeded = self.try_update()
-            message_dict = {'type': 'update-confirm', 'success': has_succeeded}
-            confirm_message = to_json(message_dict)
+            has_succeeded = self.try_update(message_dict)
+            response_dict = {'type': 'update-confirm', 'success': has_succeeded}
+            confirm_message = to_json(response_dict)
             self.mesh.send_message(confirm_message)
                 
     def try_update(self, message_dict):
@@ -73,7 +73,7 @@ class MasterNode:
             {
                 'setup': '',
                 'loop': '',
-                'restart': False,
+                'reboot': False,
                 'sleep': False,
             }
         }  # TODO: dont hard code

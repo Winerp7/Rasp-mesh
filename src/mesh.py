@@ -80,7 +80,6 @@ class MeshNet:
 
         message = self.write_buffer[-1]
         
-
         # TODO Change
         if self.is_master:
             write_successful = self.mesh.write(message, ord('M'), 4)
