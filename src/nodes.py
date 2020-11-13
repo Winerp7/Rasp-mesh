@@ -72,7 +72,7 @@ class MasterNode:
         self.nodes = {'00000000e86aa86c': 
             {
                 'setup': '',
-                'loop': 'upload({\"sensor\": \"DHT\", \"value\": 22.3})\nwait(5000)',
+                'loop': 'upload({"sensor": "DHT", "value": 22.3})\nwait(5000)',
                 'reboot': False,
                 'sleep': False,
             }
