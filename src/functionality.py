@@ -1,5 +1,5 @@
 import threading
-from utils import delay
+from utils import delay, get_serial
 
 class Functionality(threading.Thread):
     def __init__(self, setup, loop, mesh):
@@ -16,6 +16,12 @@ class Functionality(threading.Thread):
 
     def helper_functions(self):
         def upload(data_dict): # TODO
+            message_dict = {
+                'type': 'data', 
+                'sensor-values': data_dict,
+                'time': '2131322132', # TODO MATTI CHANGE THIS TO OTHER FORMAT
+                'id': get_serial()
+                }
             pass
 
         wait = lambda millis: delay(millis)
