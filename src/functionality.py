@@ -1,5 +1,6 @@
 import threading
 from utils import delay, get_serial, to_json
+from datetime import datetime
 
 class Functionality(threading.Thread):
     def __init__(self, setup, loop, mesh):
@@ -14,12 +15,12 @@ class Functionality(threading.Thread):
     def stop(self):
         self.stopped = True
 
-    def helper_functions(self):
+    def helper_functions(self): # functions available to the user
         def upload(data_dict): # TODO
             message_dict = {
                 'type': 'data', 
                 'sensor-values': data_dict,
-                'time': '2131322132', # TODO MATTI CHANGE THIS TO OTHER FORMAT
+                'time': datetime.now().isoformat(), # TODO MATTI CHANGE THIS TO OTHER FORMAT
                 'id': get_serial()
                 }
             data_message = to_json(message_dict)
