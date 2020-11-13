@@ -71,10 +71,10 @@ class MasterNode:
         self.id = get_serial()
         self.nodes = {'00000000e86aa86c': 
             {
-                'setup': ''
-                'loop': ''
-                'restart': False
-                'sleep': False
+                'setup': '',
+                'loop': '',
+                'restart': False,
+                'sleep': False,
             }
         }  # TODO: dont hard code
 
@@ -117,7 +117,7 @@ class MasterNode:
             # send back to server
 
     def new_node(self, _id):
-        # TODO: init node on server
+        pass # TODO: init node on server
         # Add to some list of nodes
 
     def send_update(self, _id):
