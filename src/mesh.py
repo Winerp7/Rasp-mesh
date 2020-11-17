@@ -79,14 +79,14 @@ class MeshNet:
         if len(self.write_buffer) == 0:
             return
 
-        message, to_address = self.write_buffer[-1]
+        message, to_address = self.write_buffer.pop()
         
         write_successful = self.mesh.write(to_address, message, ord('M'))
 
-        if write_successful: # If it sends the message we delete it from the buffer
-            self.write_buffer.pop()
-        elif not self.is_master:
-            self._renewAddress()
+        if not write_successful:
+            self.write_buffer.append((message, to_address)) # if the message fails to send put it back at start of the queue
+            if not self.is_master:
+                self._renewAddress()
 
     def _renewAddress(self):
         if not self.mesh.checkConnection():

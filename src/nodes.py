@@ -53,11 +53,6 @@ class SlaveNode:
         
         return func_is_working
 
-    
-    def create_data_message(self):
-        message_dict = {'type': 'data', 'values': ['what', 'the', 'fuck']}
-        message = to_json(message_dict)
-        return message
 
 class MasterNode:
     UPDATE_INTERVAL = 1000
@@ -103,7 +98,8 @@ class MasterNode:
             return
 
         _id = message_dict['id']
-        self.addresses[_id] = from_node
+        if _id in self.nodes:
+            self.addresses[_id] = from_node
 
         if message_dict['type'] == 'init':
             if _id in self.nodes:
