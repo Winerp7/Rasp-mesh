@@ -8,7 +8,7 @@ from utils import force_reboot, delay, Timer
 
 MASTER_NODE_ID = 0
 MAX_INIT_TRIES = 10
-MAX_PAYLOAD_SIZE = 144
+MAX_PAYLOAD_SIZE = 1500
 MESH_DEFAULT_CHANNEL = 90
 MESH_RENEWAL_TIMEOUT = 7500
 CE_PIN = 22
@@ -39,7 +39,8 @@ class MeshNet:
         network = RF24Network(radio)
         mesh = RF24Mesh(radio, network)
 
-        mesh.setNodeID(0 if self.is_master else 4)
+        self.is_master:
+            mesh.setNodeID(MASTER_NODE_ID)
 
         mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_250KBPS, MESH_RENEWAL_TIMEOUT)
         radio.setPALevel(RF24_PA_MAX) # Power Amplifier
@@ -47,9 +48,9 @@ class MeshNet:
 
         return radio, network, mesh
 
-    def send_message(self, message):
+    def send_message(self, message, to_address=0):  # Addresses to master by default
         encoded = str.encode(message)
-        self.write_buffer.append(encoded)
+        self.write_buffer.append((encoded, to_address))
 
     def on_messsage(self, callback):
         self.message_callback = callback
@@ -78,13 +79,9 @@ class MeshNet:
         if len(self.write_buffer) == 0:
             return
 
-        message = self.write_buffer[-1]
+        message, to_address = self.write_buffer[-1]
         
-        # TODO Change
-        if self.is_master:
-            write_successful = self.mesh.write(message, ord('M'), 4)
-        else:
-            write_successful = self.mesh.write(message, ord('M'))
+        write_successful = self.mesh.write(to_address, message, ord('M'))
 
         if write_successful: # If it sends the message we delete it from the buffer
             self.write_buffer.pop()

@@ -76,6 +76,7 @@ class MasterNode:
                 'sleep': False,
             }
         }  # TODO: dont hard code
+        self.addresses = {}
 
     def init_master(self):
         pass # TODO: init master on server
@@ -103,6 +104,7 @@ class MasterNode:
 
         if message_dict['type'] == 'init':
             _id = message_dict['id']
+            self.addresses[_id] = from_node
             if _id in self.nodes:
                 self.send_update(_id)
             else:
@@ -117,13 +119,12 @@ class MasterNode:
 
     def new_node(self, _id):
         pass # TODO: init node on server
-        # Add to some list of nodes
 
     def send_update(self, _id):
         status = self.nodes[_id]
         message_dict = {'type': 'update', **status}
         update_message = to_json(message_dict)
-        self.mesh.send_message(update_message)
+        self.mesh.send_message(update_message, self.addresses[_id])
 
 
     
