@@ -96,12 +96,14 @@ class MasterNode:
         pass
 
     def message_handler(self, from_node, message):
-        print(message, flush=True)
+        print(message, from_node, flush=True)
         message_dict = from_json(message)
 
-        if self.message_is_valid(message_dict):
-            _id = message_dict['id']
-            self.addresses[_id] = from_node
+        if not self.message_is_valid(message_dict):
+            return
+
+        _id = message_dict['id']
+        self.addresses[_id] = from_node
 
         if message_dict['type'] == 'init':
             if _id in self.nodes:
@@ -137,7 +139,7 @@ class MasterNode:
         status = self.nodes[_id]
         message_dict = {'type': 'update', **status}
         update_message = to_json(message_dict)
-        self.mesh.send_message(update_message, self.addresses[_id])
+        self.mesh.send_message(update_message, to_address=self.addresses[_id])
 
 
     
