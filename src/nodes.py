@@ -27,10 +27,7 @@ class SlaveNode:
         print(message, flush=True)
         message_dict = from_json(message)
 
-        if message_dict['type'] == 'init':
-            self.confirmed = message_dict['confirmed']
-
-        elif message_dict['type'] == 'update':
+        if message_dict['type'] == 'update':
             has_succeeded = self.try_update(message_dict)
             response_dict = {'type': 'update-confirm', 'success': has_succeeded}
             confirm_message = to_json(response_dict)
@@ -102,9 +99,11 @@ class MasterNode:
         print(message, flush=True)
         message_dict = from_json(message)
 
-        if message_dict['type'] == 'init':
+        if self.message_is_valid(message_dict):
             _id = message_dict['id']
             self.addresses[_id] = from_node
+
+        if message_dict['type'] == 'init':
             if _id in self.nodes:
                 self.send_update(_id)
             else:
@@ -120,6 +119,20 @@ class MasterNode:
     def new_node(self, _id):
         pass # TODO: init node on server
 
+    def message_is_valid(self, message_dict):
+        if 'type' not in message_dict:
+            return False
+        
+        if message_dict['type'] == 'init':
+            return 'id' in message_dict
+
+        elif message_dict['type'] == 'data':
+            return all(key in message_dict for key in ['id', 'sensor-values', 'time'])
+
+        elif message_dict['type'] == 'update-confirm':
+            return all(key in message_dict for key in ['id', 'success'])
+
+        
     def send_update(self, _id):
         status = self.nodes[_id]
         message_dict = {'type': 'update', **status}

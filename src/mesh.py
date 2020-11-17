@@ -39,7 +39,7 @@ class MeshNet:
         network = RF24Network(radio)
         mesh = RF24Mesh(radio, network)
 
-        self.is_master:
+        if self.is_master:
             mesh.setNodeID(MASTER_NODE_ID)
 
         mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_250KBPS, MESH_RENEWAL_TIMEOUT)
