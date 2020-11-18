@@ -44,7 +44,7 @@ class MeshNet:
         else:
             mesh.setNodeID(4)
 
-        mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_1MBPS, MESH_RENEWAL_TIMEOUT)
+        mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_2MBPS, MESH_RENEWAL_TIMEOUT)
         radio.setPALevel(RF24_PA_MAX) # Power Amplifier
         radio.printDetails()
 
