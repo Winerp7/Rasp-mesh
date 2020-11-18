@@ -27,10 +27,7 @@ class SlaveNode:
         print(message, flush=True)
         message_dict = from_json(message)
 
-        if message_dict['type'] == 'init':
-            self.confirmed = message_dict['confirmed']
-
-        elif message_dict['type'] == 'update':
+        if message_dict['type'] == 'update':
             has_succeeded = self.try_update(message_dict)
             response_dict = {'type': 'update-confirm', 'success': has_succeeded}
             confirm_message = to_json(response_dict)
@@ -56,11 +53,6 @@ class SlaveNode:
         
         return func_is_working
 
-    
-    def create_data_message(self):
-        message_dict = {'type': 'data', 'values': ['what', 'the', 'fuck']}
-        message = to_json(message_dict)
-        return message
 
 class MasterNode:
     UPDATE_INTERVAL = 60000
@@ -78,9 +70,10 @@ class MasterNode:
                 'sleep': False,
             }
         }  # TODO: dont hard code
+        self.addresses = {}
 
     def init_master(self):
-        init_dict = { 'nodeID': _id, 'status': 'Online', 'isMaster': True}
+        init_dict = { 'nodeID': self.id, 'status': 'Online', 'isMaster': True}
         message = to_json(init_dict)
         self.post_request('initNode', message)
 
@@ -110,8 +103,15 @@ class MasterNode:
             print("No updates for your slaves")
 
     def message_handler(self, from_node, message):
-        print(message, flush=True)
+        print(message, from_node, flush=True)
         message_dict = from_json(message)
+
+        if not self.message_is_valid(message_dict):
+            return
+
+        _id = message_dict['id']
+        if _id in self.nodes:
+            self.addresses[_id] = from_node
 
         if message_dict['type'] == 'init':
             _id = message_dict['id']
@@ -139,11 +139,25 @@ class MasterNode:
         message = to_json(init_dict)
         self.post_request('initNode', message)
 
+    def message_is_valid(self, message_dict):
+        if 'type' not in message_dict:
+            return False
+        
+        if message_dict['type'] == 'init':
+            return 'id' in message_dict
+
+        elif message_dict['type'] == 'data':
+            return all(key in message_dict for key in ['id', 'sensor-values', 'time'])
+
+        elif message_dict['type'] == 'update-confirm':
+            return all(key in message_dict for key in ['id', 'success'])
+
+        
     def send_update(self, _id):
         status = self.nodes_config[_id]
         message_dict = {'type': 'update', **status}
         update_message = to_json(message_dict)
-        self.mesh.send_message(update_message)
+        self.mesh.send_message(update_message, to_address=self.addresses[_id])
 
     def post_sensor_data(self):
         message = to_json(self.sensor_data)
@@ -156,7 +170,7 @@ class MasterNode:
         return 'http://localhost:3000/pi/' + path 
 
     def post_request(self, path, message):
-        url = create_url(path)
+        url = self.create_url(path)
         response = None
         try:
             response = requests.post(url, json=message)
@@ -166,7 +180,7 @@ class MasterNode:
 
 
     def get_request(self, path, message):
-        url = create_url(path)
+        url = self.create_url(path)
         response = None
         try:
             response = requests.get(url, json=message)
