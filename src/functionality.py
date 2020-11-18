@@ -19,8 +19,7 @@ class Functionality(threading.Thread):
         def upload(data_dict): # TODO
             message_dict = {
                 'type': 'data', 
-                'sensor-values': data_dict,
-                'time': datetime.now().isoformat(), # TODO MATTI CHANGE THIS TO OTHER FORMAT
+                'sensor-values': data_dict.update({'time': datetime.now().isoformat()}),
                 'id': get_serial()
                 }
             data_message = to_json(message_dict)

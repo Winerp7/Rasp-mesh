@@ -63,12 +63,14 @@ class SlaveNode:
         return message
 
 class MasterNode:
-    UPDATE_INTERVAL = 1000
+    UPDATE_INTERVAL = 60000
 
     def __init__(self):
         self.mesh = MeshNet(master=True)
         self.id = get_serial()
-        self.nodes = {'00000000e86aa86c': 
+        self.sensor_data = {}
+        self.nodes = []
+        self.nodes_config = {'00000000e86aa86c': 
             {
                 'setup': '',
                 'loop': 'upload({"sensor": "DHT", "value": 22.3})\nwait(5000)',
@@ -78,7 +80,9 @@ class MasterNode:
         }  # TODO: dont hard code
 
     def init_master(self):
-        pass # TODO: init master on server
+        init_dict = { 'nodeID': _id, 'status': 'Online', 'isMaster': True}
+        message = to_json(init_dict)
+        self.post_request('initNode', message)
 
     def run(self):
         self.mesh.on_messsage(self.message_handler)
@@ -90,12 +94,20 @@ class MasterNode:
             self.mesh.update()
 
             if timer.time_passed() > MasterNode.UPDATE_INTERVAL:
-                self.fetch_updates()
+                self.fetch_functionality()
                 timer.reset()
 
 
-    def fetch_updates(self): # TODO, get /update from server
-        pass
+    def fetch_functionality(self): 
+        try:
+            updates = self.get_request('getFunctionality', {'email': 'jens@mytest.com'}).json()
+            for node in updates:
+                _id = node['nodeID']
+                body = node['body']
+                self.nodes_config[_id] = body
+                self.send_update(_id)
+        except Exception as e:
+            print("No updates for your slaves")
 
     def message_handler(self, from_node, message):
         print(message, flush=True)
@@ -103,27 +115,62 @@ class MasterNode:
 
         if message_dict['type'] == 'init':
             _id = message_dict['id']
-            if _id in self.nodes:
+            if _id in self.nodes_config:
                 self.send_update(_id)
             else:
                 self.new_node(message_dict['id'])
 
-        if message_dict['type'] == 'data': # TODO: send data to server
-            pass
-        
+        if message_dict['type'] == 'data': 
+            _id = message_dict['id']
+            sensor_values = message_dict['sensor-values']
+            if _id  in self.sensor_data:
+                self.sensor_data[_id].append(sensor_values)
+            else:
+                self.sensor_data[_id] = [sensor_values]
+
+
         if message_dict['type'] == 'update-confirm': # TODO: change update state of the node
             update_succeeded = message_dict['success']
             # send back to server
 
     def new_node(self, _id):
-        pass # TODO: init node on server
-        # Add to some list of nodes
+        self.nodes.append(_id)
+        init_dict = { 'nodeID': _id, 'status': 'Online'}
+        message = to_json(init_dict)
+        self.post_request('initNode', message)
 
     def send_update(self, _id):
-        status = self.nodes[_id]
+        status = self.nodes_config[_id]
         message_dict = {'type': 'update', **status}
         update_message = to_json(message_dict)
         self.mesh.send_message(update_message)
 
+    def post_sensor_data(self):
+        message = to_json(self.sensor_data)
+        response = self.post_request('updateSensorData', message)
+        if response is not None and response.ok:
+            self.sensor_data.clear()
+        
 
-    
+    def create_url(self, path):
+        return 'http://localhost:3000/pi/' + path 
+
+    def post_request(self, path, message):
+        url = create_url(path)
+        response = None
+        try:
+            response = requests.post(url, json=message)
+        except Exception as e:
+            print(e)
+        return response
+
+
+    def get_request(self, path, message):
+        url = create_url(path)
+        response = None
+        try:
+            response = requests.get(url, json=message)
+        except Exception as e:
+            print(e)
+        return response
+        
