@@ -110,8 +110,7 @@ class MasterNode:
             return
 
         _id = message_dict['id']
-        if _id in self.nodes:
-            self.addresses[_id] = from_node
+        self.addresses[_id] = from_node
 
         if message_dict['type'] == 'init':
             _id = message_dict['id']
@@ -167,7 +166,7 @@ class MasterNode:
         
 
     def create_url(self, path):
-        return 'https://winejs.azurewebsites.net/pi/' + path 
+        return 'http://localhost:3000/pi/' + path 
 
     def post_request(self, path, message):
         url = self.create_url(path)
