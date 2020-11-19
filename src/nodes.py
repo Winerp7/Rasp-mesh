@@ -167,7 +167,7 @@ class MasterNode:
         
 
     def create_url(self, path):
-        return 'http://localhost:3000/pi/' + path 
+        return 'https://winejs.azurewebsites.net/pi/' + path 
 
     def post_request(self, path, message):
         url = self.create_url(path)
