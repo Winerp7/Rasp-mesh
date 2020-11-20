@@ -4,6 +4,7 @@ from RF24Mesh import *
 
 from collections import deque
 from utils import force_reboot, delay, Timer
+from reedsolo import RSCodec 
 
 
 MASTER_NODE_ID = 0
@@ -15,7 +16,7 @@ CE_PIN = 22
 CS_PIN = 0
 BUFFER_LENGTH = 100
 WRITE_INTERVAL = 100
-
+ECC_SYMBOLS = 14
 
 class MeshNet:
     RF24_1MBPS, RF24_2MBPS, RF24_250KBPS = range(3) # 0, 1, 2
@@ -27,6 +28,7 @@ class MeshNet:
         self.is_master = master
 
         self.radio, self.network, self.mesh = self._create_mesh()
+        self.error_corrector = RSCodec(ECC_SYMBOLS)
         # add a write buffer that and send messages in update
 
         self.write_buffer = deque(maxlen=BUFFER_LENGTH)
@@ -52,6 +54,7 @@ class MeshNet:
 
     def send_message(self, message, to_address=0):  # Addresses to master by default
         encoded = str.encode(message)
+        encoded = self.error_corrector.encode(encoded) 
         self.write_buffer.append((encoded, to_address))
 
     def on_messsage(self, callback):
@@ -72,6 +75,7 @@ class MeshNet:
             header, payload = self.network.read(MAX_PAYLOAD_SIZE)
             if chr(header.type) == 'M':
                 message = payload.decode()
+                message = self.error_corrector.decode(message)[0]
                 from_node = header.from_node
 
                 if self.message_callback is not None:

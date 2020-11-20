@@ -50,6 +50,7 @@ class SlaveNode:
         if func_is_working:
             self.functionality = Functionality(setup, loop, self.mesh)
             self.functionality.start()
+            self.post_sensor_data()
         
         return func_is_working
 
@@ -74,7 +75,6 @@ class MasterNode:
 
     def init_master(self):
         init_dict = { 'nodeID': self.id, 'status': 'Online', 'isMaster': True}
-        message = to_json(init_dict)
         self.post_request('initNode', message)
 
     def run(self):
@@ -135,7 +135,6 @@ class MasterNode:
     def new_node(self, _id):
         self.nodes.append(_id)
         init_dict = { 'nodeID': _id, 'status': 'Online'}
-        message = to_json(init_dict)
         self.post_request('initNode', message)
 
     def message_is_valid(self, message_dict):
@@ -146,7 +145,7 @@ class MasterNode:
             return 'id' in message_dict
 
         elif message_dict['type'] == 'data':
-            return all(key in message_dict for key in ['id', 'sensor-values', 'time'])
+            return all(key in message_dict for key in ['id', 'sensor-values'])
 
         elif message_dict['type'] == 'update-confirm':
             return all(key in message_dict for key in ['id', 'success'])
@@ -156,15 +155,14 @@ class MasterNode:
         status = self.nodes_config[_id]
         message_dict = {'type': 'update', **status}
         update_message = to_json(message_dict)
-        self.mesh.send_message(update_message, to_address=self.addresses[_id])
+        if _id in self.addresses:
+            self.mesh.send_message(update_message, to_address=self.addresses[_id])
 
     def post_sensor_data(self):
-        message = to_json(self.sensor_data)
-        response = self.post_request('updateSensorData', message)
+        response = self.post_request('updateSensorData', self.sensor_data)
         if response is not None and response.ok:
             self.sensor_data.clear()
         
-
     def create_url(self, path):
         return 'http://localhost:3000/pi/' + path 
 
