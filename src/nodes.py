@@ -50,7 +50,6 @@ class SlaveNode:
         if func_is_working:
             self.functionality = Functionality(setup, loop, self.mesh)
             self.functionality.start()
-            self.post_sensor_data()
         
         return func_is_working
 
@@ -81,6 +80,7 @@ class MasterNode:
 
             if timer.time_passed() > MasterNode.UPDATE_INTERVAL:
                 self.fetch_functionality()
+                self.post_sensor_data()
                 timer.reset()
 
 
@@ -152,9 +152,10 @@ class MasterNode:
             self.mesh.send_message(update_message, to_address=self.addresses[_id])
 
     def post_sensor_data(self):
-        response = self.post_request('updateSensorData', self.sensor_data)
-        if response is not None and response.ok:
-            self.sensor_data.clear()
+        if self.sensor_data:
+            response = self.post_request('updateSensorData', self.sensor_data)
+            if response is not None and response.ok:
+                self.sensor_data.clear()
         
     def create_url(self, path):
         return 'http://192.168.43.105:3000/pi/' + path 
@@ -167,7 +168,6 @@ class MasterNode:
         except Exception as e:
             print(e)
         return response
-
 
     def get_request(self, path, message):
         url = self.create_url(path)
