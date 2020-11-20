@@ -56,21 +56,14 @@ class SlaveNode:
 
 
 class MasterNode:
-    UPDATE_INTERVAL = 60000
+    UPDATE_INTERVAL = 10000
 
     def __init__(self):
         self.mesh = MeshNet(master=True)
         self.id = get_serial()
         self.sensor_data = {}
         self.nodes = []
-        self.nodes_config = {'00000000e86aa86c': 
-            {
-                'setup': '',
-                'loop': 'upload({"sensor": "DHT", "value": 22.3})\nwait(5000)',
-                'reboot': False,
-                'sleep': False,
-            }
-        }  # TODO: dont hard code
+        self.nodes_config = {}
         self.addresses = {}
 
     def init_master(self):
@@ -135,7 +128,7 @@ class MasterNode:
     def new_node(self, _id):
         self.nodes.append(_id)
         init_dict = { 'nodeID': _id, 'status': 'Online'}
-        self.post_request('initNode', message)
+        self.post_request('initNode', init_dict)
 
     def message_is_valid(self, message_dict):
         if 'type' not in message_dict:

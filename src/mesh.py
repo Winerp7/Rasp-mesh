@@ -74,8 +74,8 @@ class MeshNet:
         while self.network.available():
             header, payload = self.network.read(MAX_PAYLOAD_SIZE)
             if chr(header.type) == 'M':
-                message = self.error_corrector.decode(message)[0]
-                message = payload.decode()
+                message = self.error_corrector.decode(payload)[0]
+                message = message.decode()
                 from_node = header.from_node
 
                 if self.message_callback is not None:
