@@ -74,8 +74,8 @@ class MasterNode:
         self.addresses = {}
 
     def init_master(self):
-        init_dict = { 'nodeID': self.id, 'status': 'Online', 'isMaster': True}
-        self.post_request('initNode', message)
+        init_dict = {'nodeID': self.id, 'status': 'Online', 'isMaster': True}
+        self.post_request('initNode', init_dict)
 
     def run(self):
         self.mesh.on_messsage(self.message_handler)
@@ -164,7 +164,7 @@ class MasterNode:
             self.sensor_data.clear()
         
     def create_url(self, path):
-        return 'http://localhost:3000/pi/' + path 
+        return 'http://192.168.43.105:3000/pi/' + path 
 
     def post_request(self, path, message):
         url = self.create_url(path)
