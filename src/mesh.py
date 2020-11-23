@@ -18,7 +18,6 @@ BUFFER_LENGTH = 100
 WRITE_INTERVAL = 100
 ECC_SYMBOLS = 14
 MAX_MESSAGE_SIZE = MAX_PAYLOAD_SIZE - ECC_SYMBOLS
-MULTI_MESSAGE_DELAY = 10
 
 class MeshNet:
     MSG_TYPE_INIT = 30              # ascii -> 0
@@ -30,7 +29,7 @@ class MeshNet:
     def __init__(self, master=False):
         self.is_master = master
 
-        self.radio, self.network, self.mesh = self._create_mesh()
+        self.radio, self.network, self.mesh = self._create_mesh() # TODO: do in while loop
         self.error_corrector = RSCodec(ECC_SYMBOLS)
 
         self.write_buffer = deque(maxlen=BUFFER_LENGTH)
@@ -45,7 +44,11 @@ class MeshNet:
         if self.is_master:
             mesh.setNodeID(MASTER_NODE_ID)
 
-        mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_2MBPS, MESH_RENEWAL_TIMEOUT)
+        for i in range(MAX_INIT_TRIES):
+            succes = mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_2MBPS, MESH_RENEWAL_TIMEOUT)
+            if succes:
+                break
+
         radio.setPALevel(RF24_PA_MIN) # Power Amplifier
         radio.printDetails()
 
@@ -69,21 +72,27 @@ class MeshNet:
             self.timer.reset()
 
     def _read(self):
+        message_buffer = {}
+
         while self.network.available():
             header, payload = self.network.read(MAX_PAYLOAD_SIZE)
 
             message = self.error_corrector.decode(payload)[0]  # Correct any bit flips
             message = message.decode() # Convert from byte array to string
 
-            while header.type == MeshNet.MSG_TYPE_MULTI:
-                header, payload = self.network.read(MAX_PAYLOAD_SIZE)
-
-                ecc_message = self.error_corrector.decode(payload)[0]
-                message += ecc_message.decode()
-
-            if header.type in self.message_callbacks:
+            if header.type == MeshNet.MSG_TYPE_MULTI:
+                if header.from_node in message_buffer:
+                    message_buffer[header.from_node].append(message)
+                else:
+                    message_buffer[from_node] = [message]
+            
+            elif header.type in self.message_callbacks:
+                if header.from_node in message_buffer:
+                    long_message = "".join(message_buffer[header.from_node]) + message
+                    del message_buffer[header.from_node]
+                
                 callback = self.message_callbacks[header.type]
-                callback(header.from_node, message)
+                callback(header.from_node, long_message)
 
     def _write(self):
         if len(self.write_buffer) == 0:
@@ -92,7 +101,7 @@ class MeshNet:
         message_type, message, to_address = self.write_buffer.pop()
 
         if len(message) > MAX_MESSAGE_SIZE:
-
+            write_successful = self._multi_message_write(to_address, message, message_type)
         else: 
             message = self.error_corrector.encode(message) # Add Error Correcting SYMBOLS
             write_successful = self.mesh.write(to_address, message, message_type)
@@ -103,17 +112,18 @@ class MeshNet:
                 self._renewAddress()
 
     def _multi_message_write(to_address, message, message_type):
+        # TODO: figure out what to do if one of the messages fails to send
         chunks = [message[i:i+MAX_MESSAGE_SIZE] for i in range(0, len(message), MAX_MESSAGE_SIZE)] # split message in to chunks
         
         for chunk in chunks[:-1]: # loop through all chunks except for the last one
             chunk = self.error_corrector.encode(chunk)
             write_successful = self.mesh.write(to_address, chunk, MeshNet.MSG_TYPE_MULTI)
             if not write_successful:
-                break
+                return False
 
-            delay(MULTI_MESSAGE_DELAY)
+            delay(WRITE_INTERVAL)
 
-        self.mesh.write(to_address, chunks[-1], message_type)
+        return self.mesh.write(to_address, chunks[-1], message_type)
 
     def _renewAddress(self):
         if not self.mesh.checkConnection():
