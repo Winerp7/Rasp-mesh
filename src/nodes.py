@@ -1,6 +1,7 @@
 from mesh import MeshNet
 from utils import get_serial, delay, Timer, from_json, to_json, force_reboot
 from functionality import Functionality
+from api import Api
 import requests
 
 class SlaveNode:
@@ -9,46 +10,48 @@ class SlaveNode:
         self.id = get_serial()
         self.functionality = None
 
-    def init_node(self):
-        message_dict = {'type': 'init', 'id': self.id}
+    def _init_node(self):
+        message_dict = {'id': self.id}
         init_message = to_json(message_dict)
-        self.mesh.send_message(init_message)
+        self.mesh.send_message(MeshNet.MSG_TYPE_INIT, init_message)
     
     def run(self):
-        self.mesh.on_messsage(self.message_handler)
-        self.init_node()
+        self.mesh.add_message_callback(MeshNet.MSG_TYPE_UPDATE, self._on_update)
+
+        self._init_node()
 
         timer = Timer()
         
         while True: 
             self.mesh.update()
 
-    def message_handler(self, from_node, message):
+    def _on_update(self, from_node, message):
         print(message, flush=True)
         message_dict = from_json(message)
 
-        if message_dict['type'] == 'update':
-            has_succeeded = self.try_update(message_dict)
-            response_dict = {'type': 'update-confirm', 'success': has_succeeded}
-            confirm_message = to_json(response_dict)
-            self.mesh.send_message(confirm_message)
-                
-    def try_update(self, message_dict):
+        has_succeeded = self._try_update(message_dict)
 
+        response_dict = {'success': has_succeeded}
+        confirm_message = to_json(response_dict)
+        self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE_CONFIRM, confirm_message)
+                
+    def _try_update(self, message_dict):
         if message_dict['reboot']:
             force_reboot()
 
         if self.functionality is not None:
             self.functionality.stop()
-        
+            del self.functionality
+
         if message_dict['sleep']:
             return True
-    
+
         setup, loop = message_dict['setup'], message_dict['loop']
-        func_is_working = Functionality.test_functionality(setup, loop)
+
+        self.functionality = Functionality(setup, loop, self.mesh)
+        func_is_working = self.functionality.test()
         
         if func_is_working:
-            self.functionality = Functionality(setup, loop, self.mesh)
             self.functionality.start()
         
         return func_is_working
@@ -59,19 +62,24 @@ class MasterNode:
 
     def __init__(self):
         self.mesh = MeshNet(master=True)
+        self.api = Api()
         self.id = get_serial()
+
         self.sensor_data = {}
         self.nodes = []
         self.nodes_config = {}
         self.addresses = {}
 
-    def init_master(self):
+    def _init_master(self):
         init_dict = {'nodeID': self.id, 'status': 'Online', 'isMaster': True}
-        self.post_request('initNode', init_dict)
+        self.api.post_request('initNode', init_dict)
 
     def run(self):
-        self.mesh.on_messsage(self.message_handler)
-        self.init_master()
+        self._init_master()
+
+        self.mesh.add_message_callback(MeshNet.MSG_TYPE_INIT, self._on_init)
+        self.mesh.add_message_callback(MeshNet.MSG_TYPE_UPDATE_CONFIRM, self._on_update_confirm)
+        self.mesh.add_message_callback(MeshNet.MSG_TYPE_DATA, self._on_update_confirm)
 
         timer = Timer()
 
@@ -79,14 +87,14 @@ class MasterNode:
             self.mesh.update()
 
             if timer.time_passed() > MasterNode.UPDATE_INTERVAL:
-                self.fetch_functionality()
-                self.post_sensor_data()
+                self._fetch_functionality()
+                self._post_sensor_data()
                 timer.reset()
 
-
-    def fetch_functionality(self): 
+    def _fetch_functionality(self): 
         try:
-            updates = self.get_request('getFunctionality', {'email': 'jens@mytest.com'}).json()
+            updates = self.api.get_request('getFunctionality', {'email': 'jens@mytest.com'}).json() 
+            # TODO: add the identification to the Api class when we figure out how to do this
             for node in updates:
                 _id = node['nodeID']
                 body = node['body']
@@ -95,86 +103,48 @@ class MasterNode:
         except Exception as e:
             print("No updates for your slaves")
 
-    def message_handler(self, from_node, message):
-        print(message, from_node, flush=True)
+    def _post_sensor_data(self):
+        if self.sensor_data:
+            response = self.api.post_request('updateSensorData', self.sensor_data)
+            if response is not None and response.ok:
+                self.sensor_data.clear()
+
+    def _on_init(from_node, message):
         message_dict = from_json(message)
 
-        if not self.message_is_valid(message_dict):
-            return
+        _id = message_dict['id']
+        if _id in self.nodes_config: # If node already exists, just send the functionality, else init the node on server
+            status = self.nodes_config[_id]
+            update_message = to_json(status)
+            if _id in self.addresses:
+                self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.addresses[_id])
+        else:
+            self.nodes.append(_id)
+            init_dict = {'nodeID': _id, 'status': 'Online'}
+            self.api.post_request('initNode', init_dict)
 
         _id = message_dict['id']
         self.addresses[_id] = from_node
 
-        if message_dict['type'] == 'init':
-            _id = message_dict['id']
-            if _id in self.nodes_config:
-                self.send_update(_id)
-            else:
-                self.new_node(message_dict['id'])
+    def _on_data(from_node, message):
+        message_dict = from_json(message)
 
-        if message_dict['type'] == 'data': 
-            _id = message_dict['id']
-            sensor_values = message_dict['sensor-values']
-            if _id  in self.sensor_data:
-                self.sensor_data[_id].append(sensor_values)
-            else:
-                self.sensor_data[_id] = [sensor_values]
+        _id = message_dict['id']
+        sensor_values = message_dict['sensor-values']
+        if _id  in self.sensor_data:
+            self.sensor_data[_id].append(sensor_values)
+        else:
+            self.sensor_data[_id] = [sensor_values]
 
+        _id = message_dict['id']
+        self.addresses[_id] = from_node
 
-        if message_dict['type'] == 'update-confirm': # TODO: change update state of the node
-            update_succeeded = message_dict['success']
-            # send back to server
-
-    def new_node(self, _id):
-        self.nodes.append(_id)
-        init_dict = { 'nodeID': _id, 'status': 'Online'}
-        self.post_request('initNode', init_dict)
-
-    def message_is_valid(self, message_dict):
-        if 'type' not in message_dict:
-            return False
+    def _on_update_confirm(from_node, message):
+        message_dict = from_json(message)
+        update_succeeded = message_dict['success']
         
-        if message_dict['type'] == 'init':
-            return 'id' in message_dict
+        # TODO: send stuff to server
 
-        elif message_dict['type'] == 'data':
-            return all(key in message_dict for key in ['id', 'sensor-values'])
-
-        elif message_dict['type'] == 'update-confirm':
-            return all(key in message_dict for key in ['id', 'success'])
-
-        
-    def send_update(self, _id):
-        status = self.nodes_config[_id]
-        message_dict = {'type': 'update', **status}
-        update_message = to_json(message_dict)
-        if _id in self.addresses:
-            self.mesh.send_message(update_message, to_address=self.addresses[_id])
-
-    def post_sensor_data(self):
-        if self.sensor_data:
-            response = self.post_request('updateSensorData', self.sensor_data)
-            if response is not None and response.ok:
-                self.sensor_data.clear()
-        
-    def create_url(self, path):
-        return 'http://192.168.43.105:3000/pi/' + path 
-
-    def post_request(self, path, message):
-        url = self.create_url(path)
-        response = None
-        try:
-            response = requests.post(url, json=message)
-        except Exception as e:
-            print(e)
-        return response
-
-    def get_request(self, path, message):
-        url = self.create_url(path)
-        response = None
-        try:
-            response = requests.get(url, json=message)
-        except Exception as e:
-            print(e)
-        return response
+        _id = message_dict['id']
+        self.addresses[_id] = from_node
         
