@@ -30,7 +30,7 @@ class SlaveNode:
 
         has_succeeded = self._try_update(message_dict)
 
-        response_dict = {'success': has_succeeded}
+        response_dict = {'success': has_succeeded, 'id': self.id}
         confirm_message = to_json(response_dict)
         self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE_CONFIRM, confirm_message)
                 
@@ -112,6 +112,8 @@ class MasterNode:
         message_dict = from_json(message)
 
         _id = message_dict['id']
+        self.addresses[_id] = from_node
+
         if _id in self.nodes_config: # If node already exists, just send the functionality, else init the node on server
             self._send_update(_id)
         else:
@@ -119,11 +121,11 @@ class MasterNode:
             init_dict = {'nodeID': _id, 'status': 'Online'}
             self.api.post_request('initNode', init_dict)
 
-        _id = message_dict['id']
-        self.addresses[_id] = from_node
-
     def _on_data(self, from_node, message):
         message_dict = from_json(message)
+
+        _id = message_dict['id']
+        self.addresses[_id] = from_node
 
         _id = message_dict['id']
         sensor_values = message_dict['sensor-values']
@@ -132,8 +134,6 @@ class MasterNode:
         else:
             self.sensor_data[_id] = [sensor_values]
 
-        _id = message_dict['id']
-        self.addresses[_id] = from_node
 
     def _on_update_confirm(self, from_node, message):
         message_dict = from_json(message)
