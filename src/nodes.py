@@ -98,7 +98,7 @@ class MasterNode:
                 _id = node['nodeID']
                 body = node['body']
                 self.nodes_config[_id] = body
-                self.send_update(_id)
+                self._send_update(_id)
         except Exception as e:
             print("No updates for your slaves")
 
@@ -113,10 +113,7 @@ class MasterNode:
 
         _id = message_dict['id']
         if _id in self.nodes_config: # If node already exists, just send the functionality, else init the node on server
-            status = self.nodes_config[_id]
-            update_message = to_json(status)
-            if _id in self.addresses:
-                self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.addresses[_id])
+            self._send_update(_id)
         else:
             self.nodes.append(_id)
             init_dict = {'nodeID': _id, 'status': 'Online'}
@@ -147,3 +144,8 @@ class MasterNode:
         _id = message_dict['id']
         self.addresses[_id] = from_node
         
+    def _send_update(self, _id):
+        status = self.nodes_config[_id]
+        update_message = to_json(status)
+        if _id in self.addresses:
+            self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.addresses[_id])
