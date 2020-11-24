@@ -108,7 +108,7 @@ class MasterNode:
             if response is not None and response.ok:
                 self.sensor_data.clear()
 
-    def _on_init(from_node, message):
+    def _on_init(self, from_node, message):
         message_dict = from_json(message)
 
         _id = message_dict['id']
@@ -125,7 +125,7 @@ class MasterNode:
         _id = message_dict['id']
         self.addresses[_id] = from_node
 
-    def _on_data(from_node, message):
+    def _on_data(self, from_node, message):
         message_dict = from_json(message)
 
         _id = message_dict['id']
@@ -138,7 +138,7 @@ class MasterNode:
         _id = message_dict['id']
         self.addresses[_id] = from_node
 
-    def _on_update_confirm(from_node, message):
+    def _on_update_confirm(self, from_node, message):
         message_dict = from_json(message)
         update_succeeded = message_dict['success']
         
