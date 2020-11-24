@@ -1,3 +1,5 @@
+import requests
+
 URL = 'http://192.168.43.105:3000/pi/'
 
 class Api:

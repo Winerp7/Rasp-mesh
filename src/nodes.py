@@ -2,7 +2,6 @@ from mesh import MeshNet
 from utils import get_serial, delay, Timer, from_json, to_json, force_reboot
 from functionality import Functionality
 from api import Api
-import requests
 
 class SlaveNode:
     def __init__(self):
