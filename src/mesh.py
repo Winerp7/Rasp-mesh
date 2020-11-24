@@ -88,11 +88,11 @@ class MeshNet:
             
             elif header.type in self.message_callbacks:
                 if header.from_node in message_buffer:
-                    long_message = "".join(message_buffer[header.from_node]) + message
+                    message = "".join(message_buffer[header.from_node]) + message
                     del message_buffer[header.from_node]
                 
                 callback = self.message_callbacks[header.type]
-                callback(header.from_node, long_message)
+                callback(header.from_node, message)
 
     def _write(self):
         if len(self.write_buffer) == 0:
