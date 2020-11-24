@@ -91,7 +91,7 @@ class MeshNet:
                     message = "".join(message_buffer[header.from_node]) + message
                     del message_buffer[header.from_node]
                 
-                print(message)
+                print("received:", message)
                 callback = self.message_callbacks[header.type]
                 callback(header.from_node, message)
 
@@ -101,6 +101,8 @@ class MeshNet:
 
         message_type, message, to_address = self.write_buffer.pop()
 
+        print("Send:", message)
+
         if len(message) > MAX_MESSAGE_SIZE:
             write_successful = self._multi_message_write(to_address, message, message_type)
         else: 
@@ -108,6 +110,7 @@ class MeshNet:
             write_successful = self.mesh.write(to_address, message, message_type)
 
         if not write_successful:
+            print("Send failed")
             self.write_buffer.append((message_type, message, to_address)) # if the message fails to send put it in the back of the queue
             if not self.is_master:
                 self._renewAddress()
