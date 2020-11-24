@@ -44,10 +44,13 @@ class MeshNet:
         if self.is_master:
             mesh.setNodeID(MASTER_NODE_ID)
 
-        for i in range(MAX_INIT_TRIES):
-            succes = mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_2MBPS, MESH_RENEWAL_TIMEOUT)
-            if succes:
-                break
+        succes = mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_2MBPS, MESH_RENEWAL_TIMEOUT)
+
+        if not succes:
+            for _ in range(MAX_INIT_TRIES-1):
+                succes = mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_2MBPS, MESH_RENEWAL_TIMEOUT)
+                if succes:
+                    break
 
         radio.setPALevel(RF24_PA_MIN) # Power Amplifier
         radio.printDetails()
