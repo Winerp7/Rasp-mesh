@@ -111,7 +111,7 @@ class MeshNet:
             if not self.is_master:
                 self._renewAddress()
 
-    def _multi_message_write(to_address, message, message_type):
+    def _multi_message_write(self, to_address, message, message_type):
         # TODO: figure out what to do if one of the messages fails to send
         chunks = [message[i:i+MAX_MESSAGE_SIZE] for i in range(0, len(message), MAX_MESSAGE_SIZE)] # split message in to chunks
         
