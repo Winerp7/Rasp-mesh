@@ -29,8 +29,8 @@ class Functionality(threading.Thread):
         def upload(data_dict): # TODO
             message_dict = {
                 'type': 'data', 
-                'sensor-values': {**data_dict, 'time': datetime.now().isoformat()},,
-                'id': get_serial()
+                'sensor-values': {**data_dict, 'time': datetime.now().isoformat()},
+                'id': get_serial(),
                 }
             data_message = to_json(message_dict)
             self.mesh.send_message(data_message)
