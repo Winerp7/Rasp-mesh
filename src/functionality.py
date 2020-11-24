@@ -1,6 +1,7 @@
 import threading
 from utils import delay, get_serial, to_json
 from datetime import datetime
+from mesh import MeshNet
 
 class Functionality(threading.Thread):
     def __init__(self, setup, loop, mesh):
@@ -26,14 +27,14 @@ class Functionality(threading.Thread):
             print(e)
 
     def _helper_functions(self): # functions available to the user
-        def upload(data_dict): # TODO
+        def upload(data_dict):
             message_dict = {
                 'type': 'data', 
                 'sensor-values': {**data_dict, 'time': datetime.now().isoformat()},
                 'id': get_serial(),
                 }
             data_message = to_json(message_dict)
-            self.mesh.send_message(data_message)
+            self.mesh.send_message(MeshNet.MSG_TYPE_DATA, data_message)
 
         wait = lambda millis: delay(millis)
         
@@ -44,8 +45,8 @@ class Functionality(threading.Thread):
 
         success = True
         try:
-            exec(setup)
-            exec(loop)
+            exec(self.setup)
+            exec(self.loop)
         except:
             success = False
         
@@ -56,7 +57,7 @@ class Functionality(threading.Thread):
             assert isinstance(data_dict, dict)
 
         def wait(millis):
-            assert isinstance(data_dict, int)
+            assert isinstance(millis, int)
 
         return upload, wait
             

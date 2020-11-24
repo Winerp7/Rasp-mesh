@@ -25,7 +25,6 @@ class SlaveNode:
             self.mesh.update()
 
     def _on_update(self, from_node, message):
-        print(message, flush=True)
         message_dict = from_json(message)
 
         has_succeeded = self._try_update(message_dict)
