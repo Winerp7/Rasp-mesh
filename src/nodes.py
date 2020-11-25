@@ -111,6 +111,7 @@ class MasterNode:
         message_dict = from_json(message)
         self._update_address(message_dict, from_node)
 
+        _id = message_dict['id']
         if _id in self.nodes_config: # If node already exists, just send the functionality, else init the node on server
             self._send_update(_id)
         else:
@@ -146,6 +147,5 @@ class MasterNode:
             self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.addresses[_id])
 
     def _update_address(self, message_dict, from_node):
-        if 'id' in message_dict:
-            _id = message_dict['id']
-            self.addresses[_id] = from_node
+        _id = message_dict['id']
+        self.addresses[_id] = from_node
