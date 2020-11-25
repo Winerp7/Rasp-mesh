@@ -125,7 +125,6 @@ class MeshNet:
         
         for chunk in chunks[:-1]: # loop through all chunks except for the last one
             chunk = self.error_corrector.encode(chunk)
-            print(chunk, len(chunk))
             write_successful = self.mesh.write(to_address, chunk, MeshNet.MSG_TYPE_MULTI)
             if not write_successful:
                 return False
