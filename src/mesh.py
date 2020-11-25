@@ -84,7 +84,7 @@ class MeshNet:
                 if header.from_node in message_buffer:
                     message_buffer[header.from_node].append(message)
                 else:
-                    message_buffer[from_node] = [message]
+                    message_buffer[header.from_node] = [message]
             
             elif header.type in self.message_callbacks:
                 if header.from_node in message_buffer:
