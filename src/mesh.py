@@ -3,7 +3,7 @@ from RF24Network import *
 from RF24Mesh import *
 
 from collections import deque
-from utils import force_reboot, delay, Timer
+from utils import force_reboot, delay, Timer, delete_dhcplist
 from reedsolo import RSCodec 
 
 
@@ -27,6 +27,9 @@ class MeshNet:
     MSG_TYPE_MULTI = 34             # ascii -> 4
 
     def __init__(self, master=False):
+        if master:
+            delete_dhcplist()
+            
         self.is_master = master
 
         self.radio, self.network, self.mesh = self._create_mesh() # TODO: do in while loop
