@@ -56,7 +56,7 @@ class SlaveNode:
 
 
 class MasterNode:
-    UPDATE_INTERVAL = 60000
+    UPDATE_INTERVAL = 10000
 
     def __init__(self):
         self.mesh = MeshNet(master=True)
@@ -109,9 +109,7 @@ class MasterNode:
 
     def _on_init(self, from_node, message):
         message_dict = from_json(message)
-
-        _id = message_dict['id']
-        self.addresses[_id] = from_node
+        self._update_address(message_dict, from_node)
 
         if _id in self.nodes_config: # If node already exists, just send the functionality, else init the node on server
             self._send_update(_id)
@@ -120,12 +118,12 @@ class MasterNode:
             init_dict = {'nodeID': _id, 'status': 'Online'}
             self.api.post_request('initNode', init_dict)
 
+        self._update_address(message_dict, from_node)
+
     def _on_data(self, from_node, message):
         message_dict = from_json(message)
-
-        _id = message_dict['id']
-        self.addresses[_id] = from_node
-
+        self._update_address(message_dict, from_node)
+        
         _id = message_dict['id']
         sensor_values = message_dict['sensor-values']
         if _id  in self.sensor_data:
@@ -133,18 +131,21 @@ class MasterNode:
         else:
             self.sensor_data[_id] = [sensor_values]
 
-
     def _on_update_confirm(self, from_node, message):
         message_dict = from_json(message)
-        update_succeeded = message_dict['success']
-        
-        # TODO: send stuff to server
+        self._update_address(message_dict, from_node)
 
-        _id = message_dict['id']
-        self.addresses[_id] = from_node
+        update_succeeded = message_dict['success']
+        # 
+        # TODO: send stuff to server
         
     def _send_update(self, _id):
         status = self.nodes_config[_id]
         update_message = to_json(status)
         if _id in self.addresses:
             self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.addresses[_id])
+
+    def _update_address(self, message_dict, from_node):
+        if 'id' in message_dict:
+            _id = message_dict['id']
+            self.addresses[_id] = from_node

@@ -96,7 +96,7 @@ class MeshNet:
                     message = "".join(self.read_buffer[header.from_node]) + message
                     del self.read_buffer[header.from_node]
                 
-                print("received:", message)
+                print("Received:", message)
                 if header.type in self.message_callbacks:
                     callback = self.message_callbacks[header.type]
                     try:

@@ -30,10 +30,9 @@ class Functionality(threading.Thread):
         except Exception as e:
             print(e)
 
-    def _helper_functions(self): # functions available to t he user
+    def _helper_functions(self): # functions available to the user
         def upload(data_dict):
             message_dict = {
-                'type': 'data', 
                 'sensor-values': {**data_dict, 'time': datetime.now().isoformat()},
                 'id': get_serial(),
                 }
