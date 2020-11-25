@@ -5,6 +5,9 @@ import json
 def delay(ms):
     sleep(ms/1000.0)
     
+def delete_dhcplist():
+	subprocess.call(['sudo', 'rm', 'dhcplist.txt'])
+
 def get_serial():
 	# Extract serial from cpuinfo file
 	cpuserial = "0000000000000000"

@@ -1,6 +1,9 @@
 import threading
 from utils import delay, get_serial, to_json
 from datetime import datetime
+from mesh import MeshNet
+
+START_DELAY = 5000
 
 class Functionality(threading.Thread):
     def __init__(self, setup, loop, mesh):
@@ -15,51 +18,49 @@ class Functionality(threading.Thread):
     def stop(self):
         self.stopped = True
 
-    def helper_functions(self): # functions available to the user
-        def upload(data_dict): # TODO
-            message_dict = {
-                'type': 'data', 
-                'sensor-values': data_dict.update({'time': datetime.now().isoformat()}),
-                'id': get_serial()
-                }
-            data_message = to_json(message_dict)
-            self.mesh.send_message(data_message)
-
-        wait = lambda millis: delay(millis)
-        
-        return upload, wait
-
     def run(self):
-        upload, wait = self.helper_functions()
+        delay(START_DELAY)
+
+        upload, wait = self._helper_functions()
         try:
             exec(self.setup)
             while not self.stopped:
                 exec(self.loop)
         
         except Exception as e:
-            self.failed = True
             print(e)
 
-    @staticmethod
-    def test_functionality(setup, loop):
-        upload, wait = Functionality._test_helpers()
+    def _helper_functions(self): # functions available to the user
+        def upload(data_dict):
+            message_dict = {
+                'sensor-values': {**data_dict, 'time': datetime.now().isoformat()},
+                'id': get_serial(),
+                }
+            data_message = to_json(message_dict)
+            self.mesh.send_message(MeshNet.MSG_TYPE_DATA, data_message)
+
+        wait = lambda millis: delay(millis)
+        
+        return upload, wait
+
+    def test(self):
+        upload, wait = self._test_helpers()
 
         success = True
         try:
-            exec(setup)
-            exec(loop)
+            exec(self.setup)
+            exec(self.loop)
         except:
             success = False
         
         return success
 
-    @staticmethod
-    def _test_helpers():
+    def _test_helpers(self):
         def upload(data_dict):
-            pass
+            assert isinstance(data_dict, dict)
 
         def wait(millis):
-            pass
+            assert isinstance(millis, int)
 
         return upload, wait
             
