@@ -81,6 +81,7 @@ class MeshNet:
             message = message.decode() # Convert from byte array to string
 
             if header.type == MeshNet.MSG_TYPE_MULTI:
+                print("received multi:", message)
                 if header.from_node in message_buffer:
                     message_buffer[header.from_node].append(message)
                 else:
@@ -110,8 +111,8 @@ class MeshNet:
         if len(message) > MAX_MESSAGE_SIZE:
             write_successful = self._multi_message_write(to_address, message, message_type)
         else: 
-            message = self.error_corrector.encode(message) # Add Error Correcting SYMBOLS
-            write_successful = self.mesh.write(to_address, message, message_type)
+            ecc_message = self.error_corrector.encode(message) # Add Error Correcting SYMBOLS
+            write_successful = self.mesh.write(to_address, ecc_message, message_type)
 
         if not write_successful:
             print("Send failed")
