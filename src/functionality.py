@@ -3,6 +3,8 @@ from utils import delay, get_serial, to_json
 from datetime import datetime
 from mesh import MeshNet
 
+START_DELAY = 5000
+
 class Functionality(threading.Thread):
     def __init__(self, setup, loop, mesh):
         super(Functionality, self).__init__()
@@ -17,6 +19,8 @@ class Functionality(threading.Thread):
         self.stopped = True
 
     def run(self):
+        delay(START_DELAY)
+
         upload, wait = self._helper_functions()
         try:
             exec(self.setup)
