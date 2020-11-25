@@ -15,7 +15,7 @@ MESH_RENEWAL_TIMEOUT = 7500
 CE_PIN = 22
 CS_PIN = 0
 BUFFER_LENGTH = 100
-WRITE_INTERVAL = 250
+WRITE_INTERVAL = 100
 ECC_SYMBOLS = 14
 MAX_MESSAGE_SIZE = MAX_PAYLOAD_SIZE - ECC_SYMBOLS
 
@@ -74,8 +74,9 @@ class MeshNet:
             self.timer.reset()
 
     def _read(self):
-
         while self.network.available():
+            self.timer.reset() # reset write interval time, so it doesnt write just after reading, since this causes errors
+
             header, payload = self.network.read(MAX_PAYLOAD_SIZE)
 
             message = self.error_corrector.decode(payload)[0]  # Correct any bit flips
