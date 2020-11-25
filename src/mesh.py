@@ -56,6 +56,7 @@ class MeshNet:
         return radio, network, mesh
 
     def send_message(self, message_type, message, to_address=0):  # Addresses to master by default
+        print("Send:", message)
         encoded = str.encode(message) # Convert string to byte array
         self.write_buffer.append((message_type, encoded, to_address))
 
@@ -81,7 +82,6 @@ class MeshNet:
             message = message.decode() # Convert from byte array to string
 
             if header.type == MeshNet.MSG_TYPE_MULTI:
-                print("received multi:", message)
                 if header.from_node in self.read_buffer:
                     self.read_buffer[header.from_node].append(message)
                 else:
@@ -106,8 +106,6 @@ class MeshNet:
 
         message_type, message, to_address = self.write_buffer.pop()
 
-        print("Send:", message)
-
         if len(message) > MAX_MESSAGE_SIZE:
             write_successful = self._multi_message_write(to_address, message, message_type)
         else: 
@@ -115,7 +113,6 @@ class MeshNet:
             write_successful = self.mesh.write(to_address, ecc_message, message_type)
 
         if not write_successful:
-            print("Send failed")
             self.write_buffer.append((message_type, message, to_address)) # if the message fails to send put it in the back of the queue
             if not self.is_master:
                 self._renewAddress()
@@ -133,7 +130,8 @@ class MeshNet:
 
             delay(WRITE_INTERVAL)
 
-        return self.mesh.write(to_address, chunks[-1], message_type)
+        chunk = self.error_corrector.encode(chunks[-1])
+        return self.mesh.write(to_address, chunk, message_type)
 
     def _renewAddress(self):
         if not self.mesh.checkConnection():
