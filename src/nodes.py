@@ -56,7 +56,7 @@ class SlaveNode:
 
 
 class MasterNode:
-    UPDATE_INTERVAL = 10000
+    UPDATE_INTERVAL = 60000
 
     def __init__(self):
         self.mesh = MeshNet(master=True)
