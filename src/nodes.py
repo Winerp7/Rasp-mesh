@@ -77,7 +77,7 @@ class MasterNode:
 
         self.mesh.add_message_callback(MeshNet.MSG_TYPE_INIT, self._on_init)
         self.mesh.add_message_callback(MeshNet.MSG_TYPE_UPDATE_CONFIRM, self._on_update_confirm)
-        self.mesh.add_message_callback(MeshNet.MSG_TYPE_DATA, self._on_update_confirm)
+        self.mesh.add_message_callback(MeshNet.MSG_TYPE_DATA, self._on_data)
 
         timer = Timer()
 
