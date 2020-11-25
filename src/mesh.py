@@ -25,6 +25,7 @@ class MeshNet:
     MSG_TYPE_UPDATE_CONFIRM = 32    # ascii -> 2
     MSG_TYPE_DATA = 33              # ascii -> 3
     MSG_TYPE_MULTI = 34             # ascii -> 4
+    MSG_TYPE_PING = 35              # ascii -> 5
 
     def __init__(self, master=False):
         if master:
@@ -65,6 +66,9 @@ class MeshNet:
 
     def add_message_callback(self, message_type, callback):
         self.message_callbacks[message_type] = callback
+
+    def ping(to_address):
+        return self.mesh.write(to_address, b'', MeshNet.MSG_TYPE_PING)
 
     def update(self):
         self.mesh.update()

@@ -18,11 +18,11 @@ class Api:
             print(e)
         return response
 
-    def get_request(self, path, message):
+    def get_request(self, path):
         url = self.create_url(path)
         response = None
         try:
-            response = requests.get(url, json=message, params={'id': self.id})
+            response = requests.get(url, params={'id': self.id})
         except Exception as e:
             print(e)
         return response

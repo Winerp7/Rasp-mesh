@@ -64,9 +64,9 @@ class MasterNode:
         self.id = get_serial()
 
         self.sensor_data = {}
-        self.nodes = []
-        self.nodes_config = {}
-        self.addresses = {}
+
+        self.node_functionalities = {}
+        self.node_addresses = {}
 
     def _init_master(self):
         init_dict = {'nodeID': self.id, 'status': 'Online', 'isMaster': True}
@@ -85,18 +85,19 @@ class MasterNode:
             self.mesh.update()
 
             if timer.time_passed() > MasterNode.UPDATE_INTERVAL:
+                self._check_node_status()
                 self._fetch_functionality()
                 self._post_sensor_data()
                 timer.reset()
 
     def _fetch_functionality(self): 
         try:
-            updates = self.api.get_request('getFunctionality', {'email': 'jens@mytest.com'}).json() 
+            updates = self.api.get_request('getFunctionality').json() 
             # TODO: add the identification to the Api class when we figure out how to do this
             for node in updates:
                 _id = node['nodeID']
                 body = node['body']
-                self.nodes_config[_id] = body
+                self.node_functionalities[_id] = body
                 self._send_update(_id)
         except Exception as e:
             print("No updates for your slaves")
@@ -112,10 +113,9 @@ class MasterNode:
         self._update_address(message_dict, from_node)
 
         _id = message_dict['id']
-        if _id in self.nodes_config: # If node already exists, just send the functionality, else init the node on server
+        if _id in self.node_functionalities: # If node already exists, just send the functionality, else init the node on server
             self._send_update(_id)
         else:
-            self.nodes.append(_id)
             init_dict = {'nodeID': _id, 'status': 'Online'}
             self.api.post_request('initNode', init_dict)
 
@@ -137,15 +137,25 @@ class MasterNode:
         self._update_address(message_dict, from_node)
 
         update_succeeded = message_dict['success']
-        # 
         # TODO: send stuff to server
         
     def _send_update(self, _id):
-        status = self.nodes_config[_id]
+        status = self.node_functionalities[_id]
         update_message = to_json(status)
-        if _id in self.addresses:
-            self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.addresses[_id])
+        if _id in self.node_addresses:
+            self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.node_addresses[_id])
 
     def _update_address(self, message_dict, from_node):
         _id = message_dict['id']
-        self.addresses[_id] = from_node
+        self.node_addresses[_id] = from_node
+
+    def _check_node_status(self):
+        node_statuses = {}
+
+        for _id, address in self.node_addresses:
+            alive = self.mesh.ping(address)
+
+            node_statuses[_id] = 'Online' if alive else 'Offline'
+
+            # TODO: upload to server 
+            
