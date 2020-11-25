@@ -15,7 +15,7 @@ MESH_RENEWAL_TIMEOUT = 7500
 CE_PIN = 22
 CS_PIN = 0
 BUFFER_LENGTH = 100
-WRITE_INTERVAL = 100
+WRITE_INTERVAL = 250
 ECC_SYMBOLS = 14
 MAX_MESSAGE_SIZE = MAX_PAYLOAD_SIZE - ECC_SYMBOLS
 
@@ -29,7 +29,7 @@ class MeshNet:
     def __init__(self, master=False):
         if master:
             delete_dhcplist()
-            
+
         self.is_master = master
 
         self.radio, self.network, self.mesh = self._create_mesh() # TODO: do in while loop
@@ -38,7 +38,7 @@ class MeshNet:
         self.write_buffer = deque(maxlen=BUFFER_LENGTH)
         self.read_buffer = {}
         self.message_callbacks = {}
-        self.timer = Timer()
+        self.write_timer = Timer()
 
     def _create_mesh(self):
         radio = RF24(CE_PIN, CS_PIN) # GPIO22 for CE-pin and CE0 for CS-pin
@@ -72,13 +72,13 @@ class MeshNet:
             self.mesh.DHCP()
 
         self._read()
-        if self.timer.time_passed() > WRITE_INTERVAL:
+        if self.write_timer.time_passed() > WRITE_INTERVAL:
             self._write()
-            self.timer.reset()
+            self.write_timer.reset()
 
     def _read(self):
         while self.network.available():
-            self.timer.reset() # reset write interval time, so it doesnt write just after reading, since this causes errors
+            self.write_timer.reset() # reset write interval time, so it doesnt write just after reading, since this causes errors
 
             header, payload = self.network.read(MAX_PAYLOAD_SIZE)
 
