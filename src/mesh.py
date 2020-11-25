@@ -33,6 +33,7 @@ class MeshNet:
         self.error_corrector = RSCodec(ECC_SYMBOLS)
 
         self.write_buffer = deque(maxlen=BUFFER_LENGTH)
+        self.read_buffer = {}
         self.message_callbacks = {}
         self.timer = Timer()
 
@@ -72,7 +73,6 @@ class MeshNet:
             self.timer.reset()
 
     def _read(self):
-        message_buffer = {}
 
         while self.network.available():
             header, payload = self.network.read(MAX_PAYLOAD_SIZE)
@@ -82,15 +82,15 @@ class MeshNet:
 
             if header.type == MeshNet.MSG_TYPE_MULTI:
                 print("received multi:", message)
-                if header.from_node in message_buffer:
-                    message_buffer[header.from_node].append(message)
+                if header.from_node in self.read_buffer:
+                    self.read_buffer[header.from_node].append(message)
                 else:
-                    message_buffer[header.from_node] = [message]
+                    self.read_buffer[header.from_node] = [message]
             
             elif header.type in self.message_callbacks:
-                if header.from_node in message_buffer:
-                    message = "".join(message_buffer[header.from_node]) + message
-                    del message_buffer[header.from_node]
+                if header.from_node in self.read_buffer:
+                    message = "".join(self.read_buffer[header.from_node]) + message
+                    del self.read_buffer[header.from_node]
                 
                 print("received:", message)
                 if header.type in self.message_callbacks:
