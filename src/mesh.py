@@ -98,7 +98,8 @@ class MeshNet:
                     try:
                         callback(header.from_node, message)
                     except Exception as e:
-                        print('callback func failed:', e)
+                        print('callback func failed')
+                        print(type(e), e.args, e)
 
     def _write(self):
         if len(self.write_buffer) == 0:
