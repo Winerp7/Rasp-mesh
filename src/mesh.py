@@ -92,8 +92,12 @@ class MeshNet:
                     del message_buffer[header.from_node]
                 
                 print("received:", message)
-                callback = self.message_callbacks[header.type]
-                callback(header.from_node, message)
+                if header.type in self.message_callbacks:
+                    callback = self.message_callbacks[header.type]
+                    try:
+                        callback(header.from_node, message)
+                    except Exception as e:
+                        print('callback func failed:', e)
 
     def _write(self):
         if len(self.write_buffer) == 0:
@@ -121,6 +125,7 @@ class MeshNet:
         
         for chunk in chunks[:-1]: # loop through all chunks except for the last one
             chunk = self.error_corrector.encode(chunk)
+            print(chunk, len(chunk))
             write_successful = self.mesh.write(to_address, chunk, MeshNet.MSG_TYPE_MULTI)
             if not write_successful:
                 return False
