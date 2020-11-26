@@ -99,7 +99,7 @@ class MasterNode:
                 _id = node['nodeID']
                 body = node['body']
                 self.node_functionalities[_id] = body
-                self.node_update_statuses[_id] = 'Peding'
+                self.node_update_statuses[_id] = 'Pending'
                 self._send_update(_id)
         except Exception as e:
             print("No updates for your slaves")
@@ -122,6 +122,7 @@ class MasterNode:
             self.api.post_request('initNode', init_dict)
 
         self._update_address(message_dict, from_node)
+        self.node_update_statuses[_id] = 'Updated'
 
     def _on_data(self, from_node, message):
         message_dict = from_json(message)
