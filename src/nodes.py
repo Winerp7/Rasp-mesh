@@ -67,6 +67,7 @@ class MasterNode:
 
         self.node_functionalities = {}
         self.node_addresses = {}
+        self.node_update_statuses = {}
 
     def _init_master(self):
         init_dict = {'nodeID': self.id, 'status': 'Online', 'isMaster': True}
@@ -98,6 +99,7 @@ class MasterNode:
                 _id = node['nodeID']
                 body = node['body']
                 self.node_functionalities[_id] = body
+                self.node_update_statuses[_id] = 'Peding'
                 self._send_update(_id)
         except Exception as e:
             print("No updates for your slaves")
@@ -137,7 +139,8 @@ class MasterNode:
         self._update_address(message_dict, from_node)
 
         update_succeeded = message_dict['success']
-        # TODO: send stuff to server
+        _id = message_dict['id']
+        self.node_update_statuses[_id] = 'Updated' if update_succeeded else 'Failed'
         
     def _send_update(self, _id):
         status = self.node_functionalities[_id]
@@ -150,12 +153,16 @@ class MasterNode:
         self.node_addresses[_id] = from_node
 
     def _check_node_status(self):
-        node_statuses = {}
+        status = []
 
         for _id, address in self.node_addresses:
             alive = self.mesh.ping(address)
 
-            node_statuses[_id] = 'Online' if alive else 'Offline'
+            node_status = 'Online' if alive else 'Offline'
+            update_status = self.node_update_statuses[_id]
+            status_dict = {'nodeID': _id, 'status': node_status, 'updateStatus': update_status}
 
-            # TODO: upload to server 
+            status.append(status_dict)
+
+        self.api.post_request('updateLoad', status)
             
