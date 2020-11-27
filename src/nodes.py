@@ -86,8 +86,8 @@ class MasterNode:
             self.mesh.update()
 
             if timer.time_passed() > MasterNode.UPDATE_INTERVAL:
-                self._check_node_status()
                 self._fetch_functionality()
+                self._check_node_status()
                 self._post_sensor_data()
                 timer.reset()
 
