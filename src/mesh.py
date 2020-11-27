@@ -67,7 +67,7 @@ class MeshNet:
     def add_message_callback(self, message_type, callback):
         self.message_callbacks[message_type] = callback
 
-    def ping(to_address):
+    def ping(self, to_address):
         return self.mesh.write(to_address, b'', MeshNet.MSG_TYPE_PING)
 
     def update(self):
