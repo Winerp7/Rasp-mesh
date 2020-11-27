@@ -156,7 +156,7 @@ class MasterNode:
     def _check_node_status(self):
         status = []
 
-        for _id, address in self.node_addresses:
+        for _id, address in self.node_addresses.items():
             alive = self.mesh.ping(address)
 
             node_status = 'Online' if alive else 'Offline'
