@@ -117,12 +117,13 @@ class MasterNode:
         _id = message_dict['id']
         if _id in self.node_functionalities: # If node already exists, just send the functionality, else init the node on server
             self._send_update(_id)
+            self.node_update_statuses[_id] = 'Updated'
         else:
+            self.node_update_statuses[_id] = 'Pending'
             init_dict = {'nodeID': _id, 'status': 'Online'}
             self.api.post_request('initNode', init_dict)
 
         self._update_address(message_dict, from_node)
-        self.node_update_statuses[_id] = 'Updated'
 
     def _on_data(self, from_node, message):
         message_dict = from_json(message)
