@@ -169,6 +169,7 @@ class MasterNode:
             status_dict = {'nodeID': _id, 'status': node_status, 'updateStatus': update_status}
 
             status.append(status_dict)
+            
 
         if status:
             self.api.post_request('updateNodes', status)
