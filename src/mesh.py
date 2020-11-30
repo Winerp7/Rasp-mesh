@@ -6,7 +6,6 @@ from collections import deque
 from utils import force_reboot, delay, Timer, delete_dhcplist
 from reedsolo import RSCodec 
 
-
 MASTER_NODE_ID = 0
 MAX_INIT_TRIES = 10
 MAX_PAYLOAD_SIZE = 144
@@ -24,6 +23,7 @@ class MeshNet:
     MSG_TYPE_UPDATE = 31            # ascii -> 1
     MSG_TYPE_UPDATE_CONFIRM = 32    # ascii -> 2
     MSG_TYPE_DATA = 33              # ascii -> 3
+
     MSG_TYPE_MULTI = 34             # ascii -> 4
     MSG_TYPE_PING = 35              # ascii -> 5
 
@@ -127,7 +127,6 @@ class MeshNet:
                 self._renewAddress()
 
     def _multi_message_write(self, to_address, message, message_type):
-        # TODO: figure out what to do if one of the messages fails to send
         chunks = [message[i:i+MAX_MESSAGE_SIZE] for i in range(0, len(message), MAX_MESSAGE_SIZE)] # split message in to chunks
         
         for chunk in chunks[:-1]: # loop through all chunks except for the last one
