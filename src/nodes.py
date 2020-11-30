@@ -101,8 +101,10 @@ class MasterNode:
                 if _id not in self.node_functionalities or self.node_functionalities[_id] != body:  # if the functionality is new
                     self.node_functionalities[_id] = body
                     self.node_update_statuses[_id] = 'Pending'
-                
-                self._send_update(_id)
+
+                if self.node_update_statuses[_id] == 'Pending' # if it's new or the slave has yet to update
+                    self._send_update(_id)
+
         except Exception as e:
             print("No updates for your slaves")
 
