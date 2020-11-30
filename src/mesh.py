@@ -33,7 +33,7 @@ class MeshNet:
 
         self.is_master = master
 
-        self.radio, self.network, self.mesh = self._create_mesh() # TODO: do in while loop
+        self.radio, self.network, self.mesh = self._create_mesh()
         self.error_corrector = RSCodec(ECC_SYMBOLS)
 
         self.write_buffer = deque(maxlen=BUFFER_LENGTH)
@@ -42,7 +42,7 @@ class MeshNet:
         self.write_timer = Timer()
 
     def _create_mesh(self):
-        radio = RF24(CE_PIN, CS_PIN) # GPIO22 for CE-pin and CE0 for CS-pin
+        radio = RF24(CE_PIN, CS_PIN)
         network = RF24Network(radio)
         mesh = RF24Mesh(radio, network)
 
@@ -60,7 +60,7 @@ class MeshNet:
         return radio, network, mesh
 
     def send_message(self, message_type, message, to_address=0):  # Addresses to master by default
-        print("Send:", message)
+        print("Send:", message, flush=True)
         encoded = str.encode(message) # Convert string to byte array
         self.write_buffer.append((message_type, encoded, to_address))
 
@@ -100,14 +100,14 @@ class MeshNet:
                     message = "".join(self.read_buffer[header.from_node]) + message
                     del self.read_buffer[header.from_node]
                 
-                print("Received:", message)
+                print("Received:", message, flush=True)
                 if header.type in self.message_callbacks:
                     callback = self.message_callbacks[header.type]
                     try:
                         callback(header.from_node, message)
                     except Exception as e:
-                        print('callback func failed')
-                        print(type(e), e.args, e)
+                        print('callback func failed', flush=True)
+                        print(type(e), e.args, e, flush=True)
 
     def _write(self):
         if len(self.write_buffer) == 0:

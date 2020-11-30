@@ -106,7 +106,7 @@ class MasterNode:
                     self._send_update(_id)
 
         except Exception as e:
-            print("No updates for your slaves")
+            print("No updates for your slaves", flush=True)
 
     def _post_sensor_data(self):
         if self.sensor_data:
