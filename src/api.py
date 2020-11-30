@@ -1,6 +1,6 @@
 import requests
 
-URL = 'http://192.168.43.105:3000/pi/'
+URL = 'https://winejs.azurewebsites.net/pi/'
 
 class Api:
     def __init__(self):
