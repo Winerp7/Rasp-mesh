@@ -171,5 +171,5 @@ class MasterNode:
             status.append(status_dict)
 
         if status:
-            self.api.post_request('updateLoad', status)
+            self.api.post_request('updateNodes', status)
             
