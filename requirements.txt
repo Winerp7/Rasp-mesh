@@ -2,3 +2,4 @@ requests
 RPi.GPIO
 gpiozero
 reedsolo
+python-dotenv
