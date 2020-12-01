@@ -1,7 +1,7 @@
 from mesh import MeshNet
-from utils import get_serial, delay, Timer, from_json, to_json, force_reboot
+from utils import get_serial, delay, Timer, json_string_to_dict, dict_to_json_string, force_reboot
 from api import Api
-
+from slave_info import SlaveInfo
 
 class MasterNode:
     UPDATE_INTERVAL = 10000
@@ -10,14 +10,11 @@ class MasterNode:
         self.mesh = MeshNet(master=True)
         self.api = Api()
         self.id = get_serial()
-
-        self.sensor_data = {}
-
-        self.node_functionalities = {}
         self.node_addresses = {}
-        self.node_update_statuses = {}
 
-    def _init_master(self):
+        self.slave_info = SlaveInfo()
+
+    def _init_master(self): # TODO: move this into slave_info and call slave info to node_info
         init_dict = {'nodeID': self.id, 'status': 'Online', 'isMaster': True}
         self.api.post_request('initNode', init_dict)
 
@@ -51,7 +48,7 @@ class MasterNode:
                     self.node_update_statuses[_id] = 'Pending'
 
                 if self.node_update_statuses[_id] == 'Pending':  # if it's new or the slave has yet to update
-                    self._send_update(_id)
+                    self._update_slave(_id)
 
         except Exception as e:
             print("No updates for your slaves", flush=True)
@@ -63,62 +60,49 @@ class MasterNode:
                 self.sensor_data.clear()
 
     def _on_init(self, from_node, message):
-        message_dict = from_json(message)
+        message_dict = json_string_to_dict(message)
         self._update_address(message_dict, from_node)
-
         _id = message_dict['id']
-        if _id in self.node_functionalities: # If node already exists, just send the functionality, else init the node on server
-            self._send_update(_id)
-            self.node_update_statuses[_id] = 'Updated'
+
+        if self.slave_info.slave_exists(_id):
+            self._update_slave(_id)
         else:
-            self.node_update_statuses[_id] = 'Pending'
-            init_dict = {'nodeID': _id, 'status': 'Online'}
-            self.api.post_request('initNode', init_dict)
+            self.slave_info.add_slave(_id)
 
         self._update_address(message_dict, from_node)
 
     def _on_data(self, from_node, message):
-        message_dict = from_json(message)
+        message_dict = json_string_to_dict(message)
         self._update_address(message_dict, from_node)
-        
+
         _id = message_dict['id']
         sensor_values = message_dict['sensor-values']
-        if _id  in self.sensor_data:
-            self.sensor_data[_id].append(sensor_values)
-        else:
-            self.sensor_data[_id] = [sensor_values]
+        self.slave_info.add_data(_id, sensor_values)
 
     def _on_update_confirm(self, from_node, message):
-        message_dict = from_json(message)
+        message_dict = json_string_to_dict(message)
         self._update_address(message_dict, from_node)
 
         update_succeeded = message_dict['success']
         _id = message_dict['id']
-        self.node_update_statuses[_id] = 'Updated' if update_succeeded else 'Failed'
+
+        update_status = 'Updated' if update_succeeded else 'Failed'
+        self.slave_info.set_update_status(_id, update_status)
         
-    def _send_update(self, _id):
+    def _update_slave(self, _id):
         status = self.node_functionalities[_id]
-        update_message = to_json(status)
+        update_message = dict_to_json_string(status)
         if _id in self.node_addresses:
             self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.node_addresses[_id])
 
-    def _update_address(self, message_dict, from_node):
+    def _update_address(self, message_dict, from_node): #TODO: move addresses into mesh.py
         _id = message_dict['id']
         self.node_addresses[_id] = from_node
 
-    def _check_node_status(self):
-        status = []
-
+    def _check_node_status(self): # TODO: move some of this into mesh.py
         for _id, address in self.node_addresses.items():
             alive = self.mesh.ping(address)
 
             node_status = 'Online' if alive else 'Offline'
-            update_status = self.node_update_statuses[_id]
-            status_dict = {'nodeID': _id, 'status': node_status, 'updateStatus': update_status}
-
-            status.append(status_dict)
-            
-
-        if status:
-            self.api.post_request('updateNodes', status)
+            self.slave_info.set_status(_id, node_status)
             

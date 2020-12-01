@@ -25,13 +25,12 @@ def get_serial():
 def force_reboot():
 	subprocess.call(['sudo', 'reboot'])
 
-def to_json(py_object):
+def dict_to_json_string(py_object):
 	json_object = json.dumps(py_object)
 	return str(json_object)
 
-def from_json(json_string):
+def json_string_to_dict(json_string):
 	return json.loads(json_string)
-
 
 def string_to_bool(string):
 	return string in ['true', 'True']

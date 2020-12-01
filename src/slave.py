@@ -1,5 +1,5 @@
 from mesh import MeshNet
-from utils import get_serial, delay, Timer, from_json, to_json, force_reboot
+from utils import get_serial, delay, Timer, json_string_to_dict, dict_to_json_string, force_reboot
 from functionality import Functionality
 
 class SlaveNode:
@@ -10,7 +10,7 @@ class SlaveNode:
 
     def _init_node(self):
         message_dict = {'id': self.id}
-        init_message = to_json(message_dict)
+        init_message = dict_to_json_string(message_dict)
         self.mesh.send_message(MeshNet.MSG_TYPE_INIT, init_message)
     
     def run(self):
@@ -24,12 +24,12 @@ class SlaveNode:
             self.mesh.update()
 
     def _on_update(self, from_node, message):
-        message_dict = from_json(message)
+        message_dict = json_string_to_dict(message)
 
         has_succeeded = self._try_update(message_dict)
 
         response_dict = {'success': has_succeeded, 'id': self.id}
-        confirm_message = to_json(response_dict)
+        confirm_message = dict_to_json_string(response_dict)
         self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE_CONFIRM, confirm_message)
                 
     def _try_update(self, message_dict):
