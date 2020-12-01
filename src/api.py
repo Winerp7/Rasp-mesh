@@ -1,10 +1,10 @@
 import requests
-
-URL = 'https://winejs.azurewebsites.net/pi/'
+import os
 
 class Api:
     def __init__(self):
-        self.id = '5f956e6dab148ff21ca3d084'
+        self.url = os.environ.get('URL')
+        self.id = os.environ.get('ID')
 
     def create_url(self, path):
         return URL + path

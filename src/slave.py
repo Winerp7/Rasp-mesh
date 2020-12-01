@@ -53,7 +53,3 @@ class SlaveNode:
         
         return func_is_working
 
-
-if __name__ == '__main__':
-    slave = SlaveNode()
-    slave.run()

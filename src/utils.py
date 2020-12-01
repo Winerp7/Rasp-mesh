@@ -32,6 +32,10 @@ def to_json(py_object):
 def from_json(json_string):
 	return json.loads(json_string)
 
+
+def string_to_bool(string):
+	return string in ['true', 'True']
+
 class Timer:
 	def __init__(self):
 		self.start = time()
