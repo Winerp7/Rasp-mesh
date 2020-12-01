@@ -85,7 +85,6 @@ class MeshNet:
             self.write_timer.reset() # reset write interval time, so it doesnt write just after reading, since this causes errors
 
             header, payload = self.network.read(MAX_PAYLOAD_SIZE)
-            
             try:
                 message = self.error_corrector.decode(payload)[0]  # Correct any bit flips
                 message = message.decode() # Convert from byte array to string
