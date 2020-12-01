@@ -7,7 +7,7 @@ class Api:
         self.id = os.environ.get('ID')
 
     def create_url(self, path):
-        return URL + path
+        return self.url + path
 
     def post_request(self, path, message):
         url = self.create_url(path)
