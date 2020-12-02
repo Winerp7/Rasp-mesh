@@ -3,6 +3,8 @@ from utils import get_serial, delay, Timer, json_string_to_dict, dict_to_json_st
 from functionality import Functionality
 
 class SlaveNode:
+    LOOP_DELAY = 0
+
     def __init__(self):
         self.mesh = MeshNet(master=False)
         self.id = get_serial()
@@ -22,6 +24,7 @@ class SlaveNode:
         
         while True: 
             self.mesh.update()
+            delay(SlaveNode.LOOP_DELAY)
 
     def _on_update(self, from_node, message):
         message_dict = json_string_to_dict(message)
