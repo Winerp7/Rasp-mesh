@@ -125,7 +125,7 @@ class MeshNet:
             write_successful = self.mesh.write(to_address, ecc_message, message_type)
 
         if not write_successful:
-            self.radio.flush_tx()
+            self.radio.flush_tx() # flush tx to prevent hardware failure
             self.write_buffer.append((message_type, message, to_address)) # if the message fails to send put it in the back of the queue
             if not self.is_master:
                 self._renewAddress()
