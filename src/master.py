@@ -61,7 +61,7 @@ class MasterNode:
         update_succeeded = message_dict['success']
         _id = message_dict['id']
 
-        update_status = 'Updated' if update_succeeded else 'Failed'
+        update_status = 'Updated' if update_succeeded else 'Failed' # TODO: make these constants in the slave_info file
         self.node_info.set_update_status(_id, update_status)
         
     def _update_slaves(self):

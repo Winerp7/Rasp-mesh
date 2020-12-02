@@ -71,7 +71,8 @@ class NodeInfo:
         for _id in self.slave_ids:
             if self.slave_update_statuses[_id] == 'Pending':
                 func = self.slave_functionalities[_id]
-                pending_funcs.append((_id, func))
+                if func is not None:
+                    pending_funcs.append((_id, func))
 
         return pending_funcs
 
