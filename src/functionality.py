@@ -1,5 +1,5 @@
 import threading
-from utils import delay, get_serial, dict_to_json_string
+from utils import delay, get_serial, to_json_string
 from datetime import datetime
 from mesh import MeshNet
 
@@ -36,7 +36,7 @@ class Functionality(threading.Thread):
                 'sensor-values': {**data_dict, 'time': datetime.now().isoformat()},
                 'id': get_serial(),
                 }
-            data_message = dict_to_json_string(message_dict)
+            data_message = to_json_string(message_dict)
             self.mesh.send_message(MeshNet.MSG_TYPE_DATA, data_message)
 
         wait = lambda millis: delay(millis)

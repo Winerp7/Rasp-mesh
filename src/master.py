@@ -1,7 +1,7 @@
 from mesh import MeshNet
-from utils import get_serial, delay, Timer, json_string_to_dict, dict_to_json_string, force_reboot
+from utils import get_serial, delay, Timer, from_json_string, to_json_string, force_reboot
 from api import Api
-from slave_info import NodeInfo
+from node_info import NodeInfo
 
 class MasterNode:
     UPDATE_INTERVAL = 10000
@@ -35,7 +35,7 @@ class MasterNode:
             delay(MasterNode.LOOP_DELAY)
 
     def _on_init(self, from_node, message):
-        message_dict = json_string_to_dict(message)   # TODO: move to mesh.py
+        message_dict = from_json_string(message)   # TODO: move to mesh.py
         self._update_address(message_dict, from_node)
         _id = message_dict['id']
 
@@ -47,7 +47,7 @@ class MasterNode:
         self._update_address(message_dict, from_node)
 
     def _on_data(self, from_node, message):
-        message_dict = json_string_to_dict(message)
+        message_dict = from_json_string(message)
         self._update_address(message_dict, from_node)
 
         _id = message_dict['id']
@@ -55,7 +55,7 @@ class MasterNode:
         self.node_info.add_data(_id, sensor_values)
 
     def _on_update_confirm(self, from_node, message):
-        message_dict = json_string_to_dict(message)
+        message_dict = from_json_string(message)
         self._update_address(message_dict, from_node)
 
         update_succeeded = message_dict['success']
@@ -66,7 +66,7 @@ class MasterNode:
         
     def _update_slaves(self):
         for _id, func in self.node_info.get_pending_functionalities():
-            update_message = dict_to_json_string(func)
+            update_message = to_json_string(func)
             if _id in self.node_addresses:
                 self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.node_addresses[_id])
             
