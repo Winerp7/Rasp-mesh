@@ -66,7 +66,7 @@ class MasterNode:
         
     def _update_slaves(self):
         for _id, func in self.node_info.get_pending_functionalities():
-            update_message = dict_to_json_string(status)
+            update_message = dict_to_json_string(func)
             if _id in self.node_addresses:
                 self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.node_addresses[_id])
             
