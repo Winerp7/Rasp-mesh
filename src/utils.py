@@ -25,12 +25,15 @@ def get_serial():
 def force_reboot():
 	subprocess.call(['sudo', 'reboot'])
 
-def to_json(py_object):
+def to_json_string(py_object):
 	json_object = json.dumps(py_object)
 	return str(json_object)
 
-def from_json(json_string):
+def from_json_string(json_string):
 	return json.loads(json_string)
+
+def string_to_bool(string):
+	return string in ['true', 'True']
 
 class Timer:
 	def __init__(self):

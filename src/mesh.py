@@ -14,7 +14,7 @@ MESH_RENEWAL_TIMEOUT = 7500
 CE_PIN = 22
 CS_PIN = 0
 BUFFER_LENGTH = 100
-WRITE_INTERVAL = 1000
+WRITE_INTERVAL = 100
 ECC_SYMBOLS = 14
 MAX_MESSAGE_SIZE = MAX_PAYLOAD_SIZE - ECC_SYMBOLS - 10
 
@@ -85,12 +85,12 @@ class MeshNet:
             self.write_timer.reset() # reset write interval time, so it doesnt write just after reading, since this causes errors
 
             header, payload = self.network.read(MAX_PAYLOAD_SIZE)
-            
             try:
                 message = self.error_corrector.decode(payload)[0]  # Correct any bit flips
                 message = message.decode() # Convert from byte array to string
             except Exception as e:
                 print(type(e), e.args, e, flush=True)
+                return
 
             if header.type == MeshNet.MSG_TYPE_MULTI:
                 if header.from_node in self.read_buffer:
@@ -125,9 +125,11 @@ class MeshNet:
             write_successful = self.mesh.write(to_address, ecc_message, message_type)
 
         if not write_successful:
+            self.radio.flush_tx() # flush tx to prevent hardware failure
             self.write_buffer.append((message_type, message, to_address)) # if the message fails to send put it in the back of the queue
             if not self.is_master:
                 self._renewAddress()
+
 
     def _multi_message_write(self, to_address, message, message_type):
         chunks = [message[i:i+MAX_MESSAGE_SIZE] for i in range(0, len(message), MAX_MESSAGE_SIZE)] # split message in to chunks
