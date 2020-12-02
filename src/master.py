@@ -20,7 +20,7 @@ class MasterNode:
         self.mesh.add_message_callback(MeshNet.MSG_TYPE_UPDATE_CONFIRM, self._on_update_confirm)
         self.mesh.add_message_callback(MeshNet.MSG_TYPE_DATA, self._on_data)
 
-        self.node_info.add_master()
+        self.node_info.add_master(self.id)
 
         timer = Timer()
         while True:
