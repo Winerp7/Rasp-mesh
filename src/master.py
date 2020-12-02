@@ -5,14 +5,14 @@ from node_info import NodeInfo
 
 class MasterNode:
     UPDATE_INTERVAL = 10000
-    LOOP_DELAY = 0
+    LOOP_DELAY = 10
 
     def __init__(self):
         self.mesh = MeshNet(master=True)
         self.api = Api()
         self.id = get_serial()
+        
         self.node_addresses = {}
-
         self.node_info = NodeInfo()
 
     def run(self):
@@ -27,7 +27,7 @@ class MasterNode:
             self.mesh.update()
 
             if timer.time_passed() > MasterNode.UPDATE_INTERVAL:
-                self._check_slave_statuses()
+                self._check_slave_statuses()  # ping the slaves to see if they are alive
                 self.node_info.sync()  # upload data and fetch new functionalities
                 self._update_slaves()  # push new functionality to the slaves
                 timer.reset()
@@ -35,7 +35,7 @@ class MasterNode:
             delay(MasterNode.LOOP_DELAY)
 
     def _on_init(self, from_node, message):
-        message_dict = from_json_string(message)   # TODO: move to mesh.py
+        message_dict = from_json_string(message)
         self._update_address(message_dict, from_node)
         _id = message_dict['id']
 
@@ -61,7 +61,7 @@ class MasterNode:
         update_succeeded = message_dict['success']
         _id = message_dict['id']
 
-        update_status = 'Updated' if update_succeeded else 'Failed' # TODO: make these constants in the slave_info file
+        update_status = 'Updated' if update_succeeded else 'Failed'
         self.node_info.set_update_status(_id, update_status)
         
     def _update_slaves(self):
@@ -70,11 +70,11 @@ class MasterNode:
             if _id in self.node_addresses:
                 self.mesh.send_message(MeshNet.MSG_TYPE_UPDATE, update_message, to_address=self.node_addresses[_id])
             
-    def _update_address(self, message_dict, from_node): #TODO: move addresses into mesh.py
+    def _update_address(self, message_dict, from_node):
         _id = message_dict['id']
         self.node_addresses[_id] = from_node
 
-    def _check_slave_statuses(self): # TODO: move some of this into mesh.py
+    def _check_slave_statuses(self):
         for _id, address in self.node_addresses.items():
             alive = self.mesh.ping(address)
 

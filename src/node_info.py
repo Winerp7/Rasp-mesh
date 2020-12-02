@@ -83,8 +83,8 @@ class NodeInfo:
                 _id = node['nodeID']
                 body = node['body']
                 if _id not in self.slave_ids or self.slave_functionalities[_id] != body:  # if the functionality is new
-                    self.node_functionalities[_id] = body
-                    self.node_update_statuses[_id] = 'Pending'
+                    self.slave_functionalities[_id] = body
+                    self.slave_update_statuses[_id] = 'Pending'
         except Exception as e:
             print("No updates for your slaves", flush=True)
 
@@ -92,6 +92,7 @@ class NodeInfo:
         if self.sensor_data:
             response = self.api.post_request('updateSensorData', self.sensor_data)
             if response is not None and response.ok:
-                self.sensor_data.clear()
+                for key in self.sensor_data:
+                    self.sensor_data[key] = []
 
     

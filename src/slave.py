@@ -3,7 +3,7 @@ from utils import get_serial, delay, Timer, from_json_string, to_json_string, fo
 from functionality import Functionality
 
 class SlaveNode:
-    LOOP_DELAY = 0
+    LOOP_DELAY = 10
 
     def __init__(self):
         self.mesh = MeshNet(master=False)
