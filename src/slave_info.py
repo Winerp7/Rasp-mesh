@@ -22,7 +22,7 @@ class NodeInfo:
             slave_status = self.slave_statuses[_id]
             update_status = self.slave_update_statuses[_id]
         
-            status_dict = {'nodeID': _id, 'status': node_status, 'updateStatus': update_status}
+            status_dict = {'nodeID': _id, 'status': slave_status, 'updateStatus': update_status}
             statuses.append(status_dict)
     
         if statuses:
