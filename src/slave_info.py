@@ -26,7 +26,7 @@ class NodeInfo:
             statuses.append(status_dict)
     
         if statuses:
-            self.api.post_request('updateNodes', status)
+            self.api.post_request('updateNodes', statuses)
         
         self.changed_slaves = []
 
