@@ -14,7 +14,7 @@ MESH_RENEWAL_TIMEOUT = 7500
 CE_PIN = 22
 CS_PIN = 0
 BUFFER_LENGTH = 100
-WRITE_INTERVAL = 500
+WRITE_INTERVAL = 100
 ECC_SYMBOLS = 14
 MAX_MESSAGE_SIZE = MAX_PAYLOAD_SIZE - ECC_SYMBOLS - 10
 
@@ -125,9 +125,11 @@ class MeshNet:
             write_successful = self.mesh.write(to_address, ecc_message, message_type)
 
         if not write_successful:
+            self.radio.flush_tx()
             self.write_buffer.append((message_type, message, to_address)) # if the message fails to send put it in the back of the queue
             if not self.is_master:
                 self._renewAddress()
+
 
     def _multi_message_write(self, to_address, message, message_type):
         chunks = [message[i:i+MAX_MESSAGE_SIZE] for i in range(0, len(message), MAX_MESSAGE_SIZE)] # split message in to chunks
