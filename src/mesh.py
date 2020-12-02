@@ -90,6 +90,7 @@ class MeshNet:
                 message = message.decode() # Convert from byte array to string
             except Exception as e:
                 print(type(e), e.args, e, flush=True)
+                return
 
             if header.type == MeshNet.MSG_TYPE_MULTI:
                 if header.from_node in self.read_buffer:
