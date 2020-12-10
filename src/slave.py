@@ -2,6 +2,8 @@ from mesh import MeshNet
 from utils import get_serial, delay, Timer, from_json_string, to_json_string, force_reboot
 from functionality import Functionality
 
+INIT_INTERVAL = 60000
+
 class SlaveNode:
     LOOP_DELAY = 10
 
@@ -9,6 +11,7 @@ class SlaveNode:
         self.mesh = MeshNet(master=False)
         self.id = get_serial()
         self.functionality = None
+        self.is_init = False
 
     def _init_node(self):
         message_dict = {'id': self.id}
@@ -17,16 +20,18 @@ class SlaveNode:
     
     def run(self):
         self.mesh.add_message_callback(MeshNet.MSG_TYPE_UPDATE, self._on_update)
-
         self._init_node()
-
         timer = Timer()
         
         while True: 
             self.mesh.update()
+            if timer.time_passed() > INIT_INTERVAL and not self.is_init:
+                self._init_node()
+
             delay(SlaveNode.LOOP_DELAY)
 
     def _on_update(self, from_node, message):
+        self.is_init = True
         message_dict = from_json_string(message)
 
         has_succeeded = self._try_update(message_dict)
