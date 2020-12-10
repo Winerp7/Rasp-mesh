@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from utils import string_to_bool
 
 if __name__ == '__main__':
-    dotenv_path = join(dirname(dirname(__file__)), 'variables.env')
+    dotenv_path = join('/home/pi', 'variables.env')
     load_dotenv(dotenv_path)
 
     is_master = string_to_bool(os.environ.get('ISMASTER'))
