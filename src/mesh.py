@@ -104,13 +104,12 @@ class MeshNet:
                     del self.read_buffer[header.from_node]
                 
                 print("Received:", message, flush=True)
-                if header.type in self.message_callbacks:
-                    callback = self.message_callbacks[header.type]
-                    try:
-                        callback(header.from_node, message)
-                    except Exception as e:
-                        print('callback func failed', flush=True)
-                        print(type(e), e.args, e, flush=True)
+                callback = self.message_callbacks[header.type]
+                try:
+                    callback(header.from_node, message)
+                except Exception as e:
+                    print('callback func failed', flush=True)
+                    print(type(e), e.args, e, flush=True)
 
     def _write(self):
         if len(self.write_buffer) == 0:
