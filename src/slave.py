@@ -27,6 +27,7 @@ class SlaveNode:
             self.mesh.update()
             if timer.time_passed() > INIT_INTERVAL and not self.is_init:
                 self._init_node()
+                timer.reset()
 
             delay(SlaveNode.LOOP_DELAY)
 
