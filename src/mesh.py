@@ -7,6 +7,7 @@ from utils import force_reboot, delay, Timer, delete_dhcplist
 from reedsolo import RSCodec 
 
 MASTER_NODE_ID = 0
+SLAVE_NODE_ID = 4
 MAX_INIT_TRIES = 10
 MAX_PAYLOAD_SIZE = 144
 MESH_DEFAULT_CHANNEL = 100
@@ -48,6 +49,8 @@ class MeshNet:
 
         if self.is_master:
             mesh.setNodeID(MASTER_NODE_ID)
+        else:
+            mesh.setNodeID(SLAVE_NODE_ID)
 
         for _ in range(MAX_INIT_TRIES):
             succes = mesh.begin(MESH_DEFAULT_CHANNEL, rf24_datarate_e.RF24_2MBPS, MESH_RENEWAL_TIMEOUT)
