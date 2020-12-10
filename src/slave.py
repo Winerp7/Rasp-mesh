@@ -50,6 +50,7 @@ class SlaveNode:
             del self.functionality
 
         if message_dict['sleep']:
+            self.functionality = None
             return True
 
         setup, loop = message_dict['setup'], message_dict['loop']
