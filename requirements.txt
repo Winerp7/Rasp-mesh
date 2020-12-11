@@ -4,4 +4,4 @@ gpiozero
 reedsolo
 python-dotenv
 adafruit_dht
-
+adafruit-circuitpython-dht
