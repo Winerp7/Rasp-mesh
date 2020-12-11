@@ -3,3 +3,5 @@ RPi.GPIO
 gpiozero
 reedsolo
 python-dotenv
+adafruit_dht
+
